@@ -6,7 +6,7 @@ using SharpYaml.Serialization;
 
 namespace DynamicConfig
 {
-    public class DynamicConfig : IDynamicConfig
+    internal class DynamicConfig : IDynamicConfig
     {
         internal const char PrefixSeparator = '-';
 
@@ -46,9 +46,12 @@ namespace DynamicConfig
         {
             _prefixConfig = new PrefixConfig(_prefixes.ToArray());
             _prefixesSet = new HashSet<string>(_prefixes);
-            _prefixes.Clear();
+            
 
             _config = ParseConfig();
+
+            _prefixes.Clear();
+            _configs.Clear();
         }
 
         public T Get<T>(string keyPath)
@@ -73,7 +76,7 @@ namespace DynamicConfig
         {
             var parsedConfig = new Dictionary<string, object>();
 
-            var mergetConfig = _configs.SelectMany(_ => _);
+            var mergetConfig = _configs.Where(c => c != null).SelectMany(_ => _);
                                     
 
             mergetConfig
@@ -101,7 +104,7 @@ namespace DynamicConfig
                     foreach (var o in value)
                     {
                         var objectKey = GetConfigKey(o.Key.ToString());
-                        var newKey = new ConfigKey(objectKey.Key, Prefix.Merge(objectKey.Prefix, pair.Key.Prefix));
+                        var newKey = ConfigKey.Merge(pair.Key, objectKey);
                         dictionary.Add(newKey, o.Value);
                     }
                 }

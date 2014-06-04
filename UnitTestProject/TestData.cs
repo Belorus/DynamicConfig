@@ -2,6 +2,8 @@
 {
     public class TestData
     {
+        public const string EmptyData = "";
+
         public const string SimpleData = @"
 a:
     b: test
@@ -21,7 +23,7 @@ a:
 c:
     k1: c-k1
 d:
-    k2: d-k2
+    k1: d-k1
 -a-d:
     k3: -a-d-k3
 -b-d:

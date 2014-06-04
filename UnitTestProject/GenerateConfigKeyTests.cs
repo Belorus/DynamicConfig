@@ -13,7 +13,7 @@ namespace UnitTestProject
         public void KeyGeneratorWithoutPrefixes()
         {
             // Aggange
-            var config = CreateConfig(TestData.SimpleData, _prefixes);
+            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key"));
@@ -27,7 +27,7 @@ namespace UnitTestProject
         public void KeyGeneratorWithPrefixes()
         {
             // Arrange
-            var config = CreateConfig(TestData.SimpleData, _prefixes);
+            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "b"));
@@ -43,7 +43,7 @@ namespace UnitTestProject
         public void KeyGeneratorWithInvalidPrefixes1()
         {
             // Arrange
-            var config = CreateConfig(TestData.SimpleData, _prefixes);
+            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "b", "e"));
@@ -58,7 +58,7 @@ namespace UnitTestProject
         public void KeyGeneratorWithInvalidPrefixes2()
         {
             // Arrange
-            var config = CreateConfig(TestData.SimpleData, _prefixes);
+            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "e", "b"));

@@ -1,20 +1,21 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using DynamicConfig;
 
 namespace UnitTestProject
 {
     public class TestsBase
     {
-        protected DynamicConfig.DynamicConfig CreateConfig(string[] cfg, string[] prefixes)
+        protected IDynamicConfig CreateConfig(string[] cfg, string[] prefixes)
         {
-            var config = new DynamicConfig.DynamicConfig(cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
+            var config = DynamicConfigFactory.CreateConfig(cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
             config.SetPrefixes(prefixes);
             config.Build();
             return config;
         }
 
-        protected DynamicConfig.DynamicConfig CreateConfig(string cfg, string[] prefixes)
+        protected internal IDynamicConfig CreateConfig(string cfg, string[] prefixes)
         {
             return CreateConfig(new[] {cfg}, prefixes);
         }
