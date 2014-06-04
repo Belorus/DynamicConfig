@@ -1,6 +1,6 @@
-/bin/
-/obj/
+bin/
+obj/
 TestResults/
-/*.DS_Store
-/*.csproj.user
+*.DS_Store
+*.csproj.user
 *.suo
