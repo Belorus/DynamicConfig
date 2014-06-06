@@ -100,5 +100,26 @@ namespace UnitTestProject
 
             // Assert - Expects exception
         }
+
+        [TestMethod]
+        public void MultipleBuildTest()
+        {
+            // Arrange 
+            var config = CreateConfig(new[] { TestData.Data4 }, _prefixes);
+
+            // Act
+            var beforeSocondBuild1 = config.Get<string>("c:k");
+            var beforeSocondBuild2 = config.Get<string>("np-r:k");
+
+            config.InsertPrefix(1, "np");
+            config.Build();
+
+            var afterSecondBuild1 = config.Get<string>("r:k");
+
+            // Assert
+            Assert.AreEqual("-a-c-k", beforeSocondBuild1);
+            Assert.AreEqual("-a-np-r-k", beforeSocondBuild2);
+            Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
+        }
     }
 }

@@ -49,9 +49,6 @@ namespace DynamicConfig
             
 
             _config = ParseConfig();
-
-            _prefixes.Clear();
-            _configs.Clear();
         }
 
         public T Get<T>(string keyPath)

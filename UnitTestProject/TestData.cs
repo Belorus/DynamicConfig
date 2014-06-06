@@ -37,6 +37,14 @@ r:
     k5: r-k5
 ";
 
+        public const string Data4 = @"
+-a-c:
+    k: -a-c-k
+-np-r:
+    k: -np-r-k
+-a-np-r:
+    k: -a-np-r-k
+";
 
         public const string DataWithoutRoot = @"
 key1: key1
