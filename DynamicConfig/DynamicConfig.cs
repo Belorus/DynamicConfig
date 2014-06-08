@@ -51,6 +51,11 @@ namespace DynamicConfig
             _config = ParseConfig();
         }
 
+        public IEnumerable<string> AllKeys
+        {
+            get { return _config.Keys; }
+        }
+
         public T Get<T>(string keyPath)
         {
             return (T)Get(keyPath);

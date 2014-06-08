@@ -1,4 +1,6 @@
-﻿namespace DynamicConfig
+﻿using System.Collections.Generic;
+
+namespace DynamicConfig
 {
     public interface IDynamicConfig
     {
@@ -6,5 +8,6 @@
         void InsertPrefix(int index, string prefix);
         void Build();
         T Get<T>(string keyPath);
+        IEnumerable<string> AllKeys { get; }
     }
 }
