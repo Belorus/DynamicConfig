@@ -17,6 +17,7 @@ namespace ConstantGenerator
             {
                 var files = options.InputConfigPath.Split(',').Select(File.OpenRead).OfType<Stream>().ToArray();
                 var config = DynamicConfigFactory.CreateConfig(files);
+                config.SetPrefixes(options.Prefixes.Split(',',';'));
                 config.Build();
 
                 string code = GenerateCode(options.Namespace, options.ClassName, config.AllKeys);

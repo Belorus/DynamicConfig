@@ -15,5 +15,8 @@ namespace ConstantGenerator
 
         [Option("c", Required = true)]
         public string ClassName { get; set; }
+
+        [Option("p", DefaultValue = "")]
+        public string Prefixes { get; set; }
     }
 }
