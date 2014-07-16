@@ -59,7 +59,7 @@ namespace DynamicConfig
 
         public T Get<T>(string keyPath)
         {
-            return (T)Get(keyPath);
+            return (T) Convert.ChangeType(Get(keyPath), typeof (T));
         }
 
         private object Get(string keyPath)
