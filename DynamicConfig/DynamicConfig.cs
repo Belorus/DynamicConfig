@@ -62,13 +62,31 @@ namespace DynamicConfig
             return (T) Convert.ChangeType(Get(keyPath), typeof (T));
         }
 
-        private object Get(string keyPath)
+        public bool TryGet<T>(string keyPath, out T value)
         {
-            if(_config == null)
+            object v;
+            if (TryGet(keyPath, out v))
+            {
+                value = (T) Convert.ChangeType(v, typeof(T));
+                return true;
+            }
+
+            value = default(T);
+            return false;
+        }
+
+        private bool TryGet(string keyPath, out object value)
+        {
+            if (_config == null)
                 throw new InvalidOperationException("Not initialized. Call method 'Build' first");
 
+            return _config.TryGetValue(keyPath, out value);            
+        }
+
+        private object Get(string keyPath)
+        {
             object value;
-            if(!_config.TryGetValue(keyPath, out value) || value == null)
+            if (!TryGet(keyPath, out value) || value == null)
             {
                 throw new ArgumentException(string.Format("DynamicConfig keypath '{0}' is invalid. ", keyPath));
             }
