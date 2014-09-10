@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CommandLine;
 using DynamicConfig;
 
@@ -35,8 +36,13 @@ namespace ConstantGenerator
 
         private static string GenerateCode(string ns, string className, IEnumerable<string> allKeys)
         {
-            var f = new ConstantClassGenerator(ns, className, allKeys.ToDictionary(GetConstantName, k => k));
+            var f = new ConstantClassGenerator(ns, className, allKeys.Select(CleanKey).GroupBy(k => k).ToDictionary(g => GetConstantName(g.Key), k => k.Key));
             return  f.TransformText();
+        }
+
+        private static string CleanKey(string arg)
+        {
+            return Regex.Replace(arg, @":(.*)-", ":");
         }
 
         private static string GetConstantName(string s)                
