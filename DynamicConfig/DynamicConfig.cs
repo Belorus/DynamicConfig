@@ -62,6 +62,15 @@ namespace DynamicConfig
             return (T) Convert.ChangeType(Get(keyPath), typeof (T));
         }
 
+        public List<TItem> GetListOf<TItem>(string keyPath)
+        {
+            List<Object> list;
+            if(!TryGet(keyPath, out list))
+                return new List<TItem>();
+
+            return new List<TItem>(list.Select(v => (TItem)Convert.ChangeType(v, typeof(TItem))));
+        }
+
         public bool TryGet<T>(string keyPath, out T value)
         {
             object v;
