@@ -97,7 +97,7 @@ namespace DynamicConfig
             object value;
             if (!TryGet(keyPath, out value) || value == null)
             {
-                throw new ArgumentException(string.Format("DynamicConfig keypath '{0}' is invalid. ", keyPath));
+                throw new ArgumentException(string.Format("DynamicConfig keypath '{0}' is invalid. {1}Registered keys:{1}{2}", keyPath, Environment.NewLine, string.Join(Environment.NewLine, AllKeys)));
             }
             return value;
         }
