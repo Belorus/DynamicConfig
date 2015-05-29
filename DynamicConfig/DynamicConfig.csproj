@@ -23,17 +23,17 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;DEV_BUILD</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;DEV_BUILD;$(ExtraDefineConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'QA' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE;DEV_BUILD</DefineConstants>
+    <DefineConstants>TRACE;DEV_BUILD;$(ExtraDefineConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;$(ExtraDefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ConfigKey.comparers.cs" />
