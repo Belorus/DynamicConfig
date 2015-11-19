@@ -9,6 +9,11 @@ a:
     b: test
 ";
 
+        public const string SimpleDataExtension = @"
+a:
+    c: test2
+";
+
         public const string Data2 = @"
 a:
     b: a-b
@@ -50,7 +55,6 @@ r:
 key1: key1
 key2: key2
 key3: key3
-";
-
+";        
     }
 }

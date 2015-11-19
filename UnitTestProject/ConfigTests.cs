@@ -59,6 +59,20 @@ namespace UnitTestProject
         }
 
         [TestMethod]
+        public void TwoConfigMergeWithCombiningTest()
+        {
+            // Arrange
+            var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.SimpleData, TestData.SimpleDataExtension }, _prefixes);
+
+            // Act
+            config.Build();
+
+            // Assert
+            Assert.AreEqual("test", config.Get<string>("a:b"));
+            Assert.AreEqual("test2", config.Get<string>("a:c"));
+        }
+
+        [TestMethod]
         public void GetDataFromConfigTest()
         {
             // Arrange 
