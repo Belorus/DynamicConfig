@@ -15,18 +15,19 @@ namespace YamlMerger
             var options = new Options();
             if (Parser.Default.ParseArguments(args, options))
             {
-                string packagePath = Path.Combine(options.OutputPath, "package.zip");
+                Console.WriteLine("Merging dynamic configs...");
 
                 Directory.CreateDirectory(options.InputPath);
                 Directory.CreateDirectory(options.OutputPath);
-                File.Delete(packagePath);
-
-                Console.WriteLine("Creating DynamicConfigs...");
-                Console.WriteLine("Pattern for config files is " + options.Pattern);
+                File.Delete(Path.Combine(options.OutputPath, "package.zip"));
 
                 string commonYamlPath = Path.Combine(options.InputPath, "common.yml");
 
-                foreach (string partFilePath in Directory.GetFiles(options.InputPath, options.Pattern))
+                string[] partsToProcess = Directory.GetFiles(options.InputPath, options.Pattern);
+
+                Console.WriteLine("Processing {0} files...", partsToProcess.Length);
+
+                foreach (string partFilePath in partsToProcess)
                 {
                     Dictionary<object, object> commonMap = LoadYamlFile(commonYamlPath);
                     Dictionary<object, object> partMap = LoadYamlFile(partFilePath);
@@ -36,8 +37,7 @@ namespace YamlMerger
 
                     string outFilePath = Path.Combine(options.OutputPath, Path.GetFileName(partFilePath).Replace(".part", ""));
 
-                    SaveYamlToFile(resultMap, outFilePath);
-                  
+                    SaveYamlToFile(resultMap, outFilePath);                  
                 }
             }
             else
@@ -84,9 +84,9 @@ namespace YamlMerger
 
         private static void SaveYamlToFile(Dictionary<object, object> partMap, string outFilePath)
         {
-            using (var file = File.OpenWrite(outFilePath))
+            using (var file = File.CreateText(outFilePath))
             {
-                new Serializer(new SerializerSettings() {SortKeyForMapping = false, EmitTags = false, PreferredIndent = 4}).Serialize(file, partMap);
+                new Serializer(new SerializerSettings() {SortKeyForMapping = false, EmitTags = false, PreferredIndent = 4, LimitPrimitiveFlowSequence = 15}).Serialize(file, partMap);
             }
         }
 
