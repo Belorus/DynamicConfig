@@ -33,7 +33,7 @@ namespace YamlMerger
                     Dictionary<object, object> partMap = LoadYamlFile(partFilePath);
 
                     Dictionary<object, object> resultMap = partMap.ToDictionary(kv => kv.Key, kv => kv.Value);
-                    CopyAndMerge(commonMap, resultMap);
+                    CopyAndMerge(Path.GetFileNameWithoutExtension(partFilePath), commonMap, resultMap);
 
                     string outFilePath = Path.Combine(options.OutputPath, Path.GetFileName(partFilePath).Replace(".part", ""));
 
@@ -49,6 +49,7 @@ namespace YamlMerger
         }
 
         private static void CopyAndMerge(
+            string name,
             Dictionary<object, object> from,
             Dictionary<object, object> to)
         {
@@ -63,7 +64,7 @@ namespace YamlMerger
                         var fromAsMap = kv.Value as Dictionary<object, object>;
                         if (fromAsMap != null)
                         {
-                            CopyAndMerge(fromAsMap, toAsMap);
+                            CopyAndMerge(name, fromAsMap, toAsMap);
                         }
                         else
                         {
@@ -72,7 +73,7 @@ namespace YamlMerger
                     }
                     else
                     {
-                        throw new NotSupportedException(string.Format("Merging two scalar keys [{0}] to associative array is not supported", kv.Key));
+                        Console.WriteLine("[{0}] - Merging key [{1}]: Taking '{2}' instead of '{3}'", name, kv.Key, toValue, kv.Value);
                     }
                 }
                 else
