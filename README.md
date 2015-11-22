@@ -5,4 +5,4 @@ A file like settings.json put somewhere to dropbox/whatever free file hosting ca
 
 This library can help you.
 
-Here is a sample config from my application:
+More on wiki https://github.com/Belorus/DynamicConfig/wiki
