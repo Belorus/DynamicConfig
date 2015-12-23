@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject
@@ -39,10 +40,10 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.Data2, _prefixes);
 
             // Act
-            var groups = config.ParseConfig();
+            var groups = config.AllKeys;
 
             // Assert
-            Assert.AreEqual(7, groups.Count);
+            Assert.AreEqual(7, groups.Count());
         }
 
         [TestMethod]
@@ -52,10 +53,10 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.Data2, TestData.Data3 }, _prefixes);
 
             // Act
-            var groups = config.ParseConfig();
+            var groups = config.AllKeys;;
 
             // Assert
-            Assert.AreEqual(8, groups.Count);
+            Assert.AreEqual(8, groups.Count());
         }
 
         [TestMethod]
@@ -134,6 +135,19 @@ namespace UnitTestProject
             Assert.AreEqual("-a-c-k", beforeSocondBuild1);
             Assert.AreEqual("-a-np-r-k", beforeSocondBuild2);
             Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
+        }
+
+        [TestMethod]
+        public void TestVersionRange()
+        {
+            // Arrange
+            var config = CreateConfig(new[] {TestData.DataWithVersions}, _prefixes);
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value2", key1);
         }
     }
 }

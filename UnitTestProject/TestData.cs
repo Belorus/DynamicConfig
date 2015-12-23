@@ -55,6 +55,12 @@ r:
 key1: key1
 key2: key2
 key3: key3
-";        
+";
+
+        public const string DataWithVersions = @"
+-(0.5.0.0-0.6.0.0)-key1: value1
+key1                   : value3
+-(0.5.0.0-2.0.0.0)-key1: value2
+";
     }
 }

@@ -17,7 +17,7 @@ namespace ConstantGenerator
             if (Parser.Default.ParseArguments(args, options))
             {
                 var files = options.InputConfigPath.Split(',').Select(File.OpenRead).OfType<Stream>().ToArray();
-                var config = DynamicConfigFactory.CreateConfig(files);
+                var config = DynamicConfigFactory.CreateConfig(new Version(1,0,0,0), files);
                 config.SetPrefixes(options.Prefixes.Split(',',';'));
                 config.Build();
 

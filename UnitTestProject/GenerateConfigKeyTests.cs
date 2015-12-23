@@ -1,4 +1,6 @@
-﻿using DynamicConfig;
+﻿using System;
+using System.Collections.Generic;
+using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject
@@ -6,14 +8,14 @@ namespace UnitTestProject
     [TestClass]
     public class GenerateConfigKeyTests : TestsBase
     {
-        private readonly string[] _prefixes = {"a", "b", "c"};
-        private readonly PrefixConfig _prefixConfig = new PrefixConfig("a", "b", "c");
+        private readonly PrefixConfig _prefixConfig = new PrefixConfig(new List<string>{"a", "b", "c"});
+        private readonly Version _version = new Version(1,0,0,0);
 
         [TestMethod]
         public void KeyGeneratorWithoutPrefixes()
         {
             // Aggange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key"));
@@ -27,7 +29,7 @@ namespace UnitTestProject
         public void KeyGeneratorWithPrefixes()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "b"));
@@ -36,37 +38,52 @@ namespace UnitTestProject
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a", "b"), result.Prefix);
+            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a", "b"}), result.Prefix);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes1()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "b", "e"));
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("e" + DynamicConfig.DynamicConfig.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a", "b"), result.Prefix);
+            Assert.AreEqual("e" + ConfigKey.PrefixSeparator + "key", result.Key);
+            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a", "b"}), result.Prefix);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes2()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
 
             // Act
             var result = config.GetConfigKey(GenerateKey("key", "a", "e", "b"));
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("e" + DynamicConfig.DynamicConfig.PrefixSeparator + "b" + DynamicConfig.DynamicConfig.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a"), result.Prefix);
+            Assert.AreEqual("e" + ConfigKey.PrefixSeparator + "b" + ConfigKey.PrefixSeparator + "key", result.Key);
+            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a"}), result.Prefix);
+        }
+
+        [TestMethod]
+        public void KeyGeneratorWithVersionRangePrefixes()
+        {
+            // Arrange
+            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+
+            // Act
+            var result = config.GetConfigKey(GenerateKey("key", "a", "b", "(2.2.0-2.3.0)", "c"));
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("key", result.Key);
+            Assert.AreEqual(new Prefix(_prefixConfig, new List<string> { "a", "b", "c" }), result.Prefix);
         }
     }
 }

@@ -1,12 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace DynamicConfig
 {
     public static class DynamicConfigFactory
     {
-        public static IDynamicConfig CreateConfig(params Stream[] configStreams)
+        public static IDynamicConfig CreateConfig(Version applicationVersion, params Stream[] configStreams)
         {
-            return new DynamicConfig(configStreams);
+            return new DynamicConfig(applicationVersion, configStreams);
         }
     }
 }

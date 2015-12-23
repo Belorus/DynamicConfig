@@ -1,6 +1,6 @@
 ﻿namespace DynamicConfig
 {
-    internal static class Int32Extensions
+    internal static class TypeExtensions
     {
         internal static short BitsCount(this int number)
         {

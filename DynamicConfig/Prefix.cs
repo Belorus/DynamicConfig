@@ -1,30 +1,28 @@
 using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
     internal class Prefix : IComparable<Prefix>
     {
-        private readonly int _hash;
+        public readonly int Hash;
 
-        public int Hash
-        {
-            get { return _hash; }
-        }
+        public static readonly Prefix Empty = new Prefix(0);
 
         private Prefix(int hash)
         {
-            _hash = hash;
+            Hash = hash;
         }
 
-        public Prefix(PrefixConfig prefixConfig, params string[] prefixes)
+        public Prefix(PrefixConfig prefixConfig, List<string> prefixes)
         {
             foreach (var prefix in prefixes)
             {
-                int offset = prefixConfig.GetIndex(prefix);
+                int offset = prefixConfig.IndexOf(prefix);
                 if (offset < 0)
                     throw new NotSupportedException(string.Format("Prefix \"{0}\" doesn't supported", prefix));
 
-                _hash |= 1 << prefixConfig.Count - offset - 1;
+                Hash |= 1 << prefixConfig.Count - offset - 1;
             }            
         }
 
@@ -35,20 +33,20 @@ namespace DynamicConfig
 
         public static Prefix Merge(Prefix first, Prefix second)
         {
-            return new Prefix(first._hash | second._hash);
+            return new Prefix(first.Hash | second.Hash);
         }
 
         protected bool Equals(Prefix other)
         {
-            return _hash == other._hash;
+            return Hash == other.Hash;
         }
 
         public int CompareTo(Prefix other)
         {
-            int thisBitsCount = _hash.BitsCount();
-            int otherBitsCount = other._hash.BitsCount();
+            int thisBitsCount = Hash.BitsCount();
+            int otherBitsCount = other.Hash.BitsCount();
             if(thisBitsCount == otherBitsCount)
-                return _hash.CompareTo(other.Hash);
+                return Hash.CompareTo(other.Hash);
             return thisBitsCount.CompareTo(otherBitsCount);
         }
 
@@ -62,12 +60,12 @@ namespace DynamicConfig
 
         public override int GetHashCode()
         {
-            return _hash;
+            return Hash;
         }
 
         public override string ToString()
         {
-            return Convert.ToString(_hash, 2);
+            return Convert.ToString(Hash, 2);
         }
     }
 }
