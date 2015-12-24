@@ -153,7 +153,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void TestVersionRangeIntersetVersions1()
+        public void TestVersionRangeIntersectVersions1()
         {
             // Arrange
             var config = CreateConfig(new[] { TestData.DataWithVersions2 }, _prefixes);
@@ -168,7 +168,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void TestVersionRangeIntersetVersions2()
+        public void TestVersionRangeIntersectVersions2()
         {
             // Arrange
             var config = CreateConfig(new[] { TestData.DataWithVersions3 }, _prefixes);
@@ -179,7 +179,7 @@ namespace UnitTestProject
             var key1 = config.Get<string>("key1");
 
             // Assert
-            Assert.AreEqual("value2", key1);
+            Assert.AreEqual("value1", key1);
         }
 
         [TestMethod]

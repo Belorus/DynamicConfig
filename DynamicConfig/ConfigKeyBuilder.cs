@@ -42,91 +42,91 @@ namespace DynamicConfig
             for (int i = 0; i < key.Length; i++)
             {
                 char current = key[i];
-                if (state == ParserState.None && current == PrefixSeparator)
-                {
-                    state = ParserState.PrefixSeparator;
-                    continue;
-                }
 
-                if (state == ParserState.PrefixSeparator && current != OpenVersionRange && current != PrefixSeparator)
+                switch (state)
                 {
-                    tokenBeginIndex = i;
-                    tokenLength++;
-                    state = ParserState.Prefix;
-                    continue;
-                }
-
-                if (state == ParserState.Prefix && current != PrefixSeparator)
-                {
-                    tokenLength++;
-                    continue;
-                }
-
-                if (state == ParserState.Prefix && current == PrefixSeparator)
-                {
-                    string prefix = key.Substring(tokenBeginIndex, tokenLength);
-                    if (_prefixBuilder.Contains(prefix))
-                    {
-                        prefixes.Add(prefix);
-                        tokenLength = 0;
-                        state = ParserState.PrefixSeparator;
-                    }
-                    else
-                    {
-                        configKey = null;
-                        return false;
-                    }
-                    continue;
-                }
-
-                if (state == ParserState.PrefixSeparator && current == OpenVersionRange)
-                {
-                    state = ParserState.BeginVersion;
-                    continue;
-                }
-
-                if (state == ParserState.BeginVersion)
-                {
-                    tokenBeginIndex = i;
-                    tokenLength++;
-                    state = ParserState.Version;
-                    continue;
-                }
-
-                if (state == ParserState.Version && current != CloseVersionRange)
-                {
-                    tokenLength++;
-                    continue;
-                }
-
-                if (state == ParserState.Version && current == CloseVersionRange)
-                {
-                    state = ParserState.EndVersion;
-                }
-
-                if (state == ParserState.EndVersion && current == PrefixSeparator)
-                {
-                    versionRange = VersionRange.Parse(key.Substring(tokenBeginIndex, tokenLength));
-                    if (!versionRange.InRange(_version))
-                    {
-                        configKey = null;
-                        return false;
-                    }
-                    tokenLength = 0;
-                    state = ParserState.PrefixSeparator;
+                    case ParserState.None:
+                        if (current == PrefixSeparator)
+                        {
+                            state = ParserState.PrefixSeparator;
+                        }
+                        break;
+                    case ParserState.PrefixSeparator:
+                        if (current != OpenVersionRange && current != PrefixSeparator)
+                        {
+                            tokenBeginIndex = i;
+                            tokenLength++;
+                            state = ParserState.Prefix;
+                        }
+                        else if (current == OpenVersionRange)
+                        {
+                            state = ParserState.BeginVersion;
+                        }
+                        break;
+                    case ParserState.Prefix:
+                        if (current != PrefixSeparator)
+                        {
+                            tokenLength++;
+                        }
+                        else
+                        {
+                            string prefix = key.Substring(tokenBeginIndex, tokenLength);
+                            if (_prefixBuilder.Contains(prefix))
+                            {
+                                prefixes.Add(prefix);
+                                tokenLength = 0;
+                                state = ParserState.PrefixSeparator;
+                            }
+                            else
+                            {
+                                configKey = null;
+                                return false;
+                            }
+                        }
+                        break;
+                    case ParserState.BeginVersion:
+                        tokenBeginIndex = i;
+                        tokenLength++;
+                        state = ParserState.Version;
+                        break;
+                    case ParserState.Version:
+                        if (current != CloseVersionRange)
+                        {
+                            tokenLength++;
+                        }
+                        else
+                        {
+                            state = ParserState.EndVersion;
+                        }
+                        break;
+                    case ParserState.EndVersion:
+                        if (current == PrefixSeparator)
+                        {
+                            if (VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange) && !versionRange.InRange(_version))
+                            {
+                                configKey = null;
+                                return false;
+                            }
+                            tokenLength = 0;
+                            state = ParserState.PrefixSeparator;
+                        }
+                        break;
                 }
             }
 
-            if (state != ParserState.Prefix && state != ParserState.None)
+            if (state == ParserState.Prefix || state == ParserState.None)
             {
-                configKey = null;
-                return false;
+                key = key.Substring(tokenBeginIndex);
+
+                if (!string.IsNullOrEmpty(key))
+                {
+                    configKey = new ConfigKey(key, _prefixBuilder.Create(prefixes), versionRange);
+                    return true;
+                }
             }
 
-            key = key.Substring(tokenBeginIndex);
-
-            configKey = new ConfigKey(key, _prefixBuilder.Create(prefixes), versionRange);
-            return true;
+            configKey = null;
+            return false;
         }
     }
 }
