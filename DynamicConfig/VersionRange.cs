@@ -2,10 +2,11 @@
 
 namespace DynamicConfig
 {
-    internal class VersionRange
+    internal class VersionRange : IComparable<VersionRange>
     {
         private readonly Version _from;
         private readonly Version _to;
+        private readonly bool _isEmpty;
 
         public static readonly VersionRange Empty = new VersionRange(null, null);
 
@@ -13,12 +14,18 @@ namespace DynamicConfig
         {
             _from = @from;
             _to = to;
+
+            _isEmpty = _from == null && _to == null;
         }
 
         public bool InRange(Version version)
         {
-            if (_from == null || _to == null)
+            if (_isEmpty)
+                return true;
+            
+            if (!_isEmpty && version == null)
                 return false;
+
             return _from <= version && version <= _to;
         }
 
@@ -36,6 +43,24 @@ namespace DynamicConfig
             }
 
             throw new ArithmeticException("Unsupported verion range format");
+        }
+
+        public int CompareTo(VersionRange other)
+        {
+            if (_isEmpty && other._isEmpty)
+                return 0;
+
+            if (_isEmpty && !other._isEmpty)
+                return -1;
+
+            if (!_isEmpty && other._isEmpty)
+                return 1;
+
+            int result = _from.CompareTo(other._from);
+            if (result != 0)
+                return result;
+
+            return other._to.CompareTo(_to);
         }
 
         public override string ToString()

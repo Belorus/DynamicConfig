@@ -8,82 +8,93 @@ namespace UnitTestProject
     [TestClass]
     public class GenerateConfigKeyTests : TestsBase
     {
-        private readonly PrefixConfig _prefixConfig = new PrefixConfig(new List<string>{"a", "b", "c"});
-        private readonly Version _version = new Version(1,0,0,0);
+        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new List<string> {"a", "b", "c"});
+        private ConfigKeyBuilder _keyBuilder;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _keyBuilder = new ConfigKeyBuilder(_prefixBuilder, new Version(1,0));
+        }
 
         [TestMethod]
         public void KeyGeneratorWithoutPrefixes()
         {
             // Aggange
-            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+            string keyString = GenerateKey("key");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("key", result.Key);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
         }
 
         [TestMethod]
         public void KeyGeneratorWithPrefixes()
         {
             // Arrange
-            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+            string keyString = GenerateKey("key", "a", "b");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "b"));
-
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a", "b"}), result.Prefix);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
+            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b" }), key.Prefix);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes1()
         {
             // Arrange
-            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+            string keyString = GenerateKey("key", "a", "b", "e");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "b", "e"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("e" + ConfigKey.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a", "b"}), result.Prefix);
+            Assert.IsFalse(result);
+            Assert.IsNull(key);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes2()
         {
             // Arrange
-            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+            string keyString = GenerateKey("key", "a", "e", "b");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "e", "b"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("e" + ConfigKey.PrefixSeparator + "b" + ConfigKey.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, new List<string>{"a"}), result.Prefix);
+            Assert.IsFalse(result);
+            Assert.IsNull(key);
         }
 
         [TestMethod]
         public void KeyGeneratorWithVersionRangePrefixes()
         {
             // Arrange
-            var config = new ConfigReader(new List<Dictionary<object, object>>(), _prefixConfig, _version);
+            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.0)", "c");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "b", "(2.2.0-2.3.0)", "c"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, new List<string> { "a", "b", "c" }), result.Prefix);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
+            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b", "c" }), key.Prefix);
         }
     }
 }

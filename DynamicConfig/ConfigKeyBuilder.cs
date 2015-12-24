@@ -1,12 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
-    partial class ConfigKey
+    internal class ConfigKeyBuilder
     {
         internal const char PrefixSeparator = '-';
         internal const char OpenVersionRange = '(';
         internal const char CloseVersionRange = ')';
+
+        private readonly PrefixBuilder _prefixBuilder;
+        private readonly Version _version;
 
         private enum ParserState
         {
@@ -18,7 +22,13 @@ namespace DynamicConfig
             EndVersion
         }
 
-        internal static ConfigKey Parse(string key, PrefixConfig prefixConfig)
+        public ConfigKeyBuilder(PrefixBuilder prefixBuilder, Version version)
+        {
+            _prefixBuilder = prefixBuilder;
+            _version = version;
+        }
+
+        public bool TryCreate(string key, out ConfigKey configKey)
         {
             var prefixes = new List<string>();
             VersionRange versionRange = VersionRange.Empty;
@@ -55,11 +65,16 @@ namespace DynamicConfig
                 if (state == ParserState.Prefix && current == PrefixSeparator)
                 {
                     string prefix = key.Substring(tokenBeginIndex, tokenLength);
-                    if (prefixConfig.Contains(prefix))
+                    if (_prefixBuilder.Contains(prefix))
                     {
                         prefixes.Add(prefix);
                         tokenLength = 0;
                         state = ParserState.PrefixSeparator;
+                    }
+                    else
+                    {
+                        configKey = null;
+                        return false;
                     }
                     continue;
                 }
@@ -92,14 +107,26 @@ namespace DynamicConfig
                 if (state == ParserState.EndVersion && current == PrefixSeparator)
                 {
                     versionRange = VersionRange.Parse(key.Substring(tokenBeginIndex, tokenLength));
+                    if (!versionRange.InRange(_version))
+                    {
+                        configKey = null;
+                        return false;
+                    }
                     tokenLength = 0;
                     state = ParserState.PrefixSeparator;
                 }
             }
 
+            if (state != ParserState.Prefix && state != ParserState.None)
+            {
+                configKey = null;
+                return false;
+            }
+
             key = key.Substring(tokenBeginIndex);
 
-            return new ConfigKey(key, new Prefix(prefixConfig, prefixes), versionRange);
+            configKey = new ConfigKey(key, _prefixBuilder.Create(prefixes), versionRange);
+            return true;
         }
     }
 }

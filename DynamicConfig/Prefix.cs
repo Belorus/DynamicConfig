@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace DynamicConfig
 {
@@ -9,21 +8,9 @@ namespace DynamicConfig
 
         public static readonly Prefix Empty = new Prefix(0);
 
-        private Prefix(int hash)
+        public Prefix(int hash)
         {
             Hash = hash;
-        }
-
-        public Prefix(PrefixConfig prefixConfig, List<string> prefixes)
-        {
-            foreach (var prefix in prefixes)
-            {
-                int offset = prefixConfig.IndexOf(prefix);
-                if (offset < 0)
-                    throw new NotSupportedException(string.Format("Prefix \"{0}\" doesn't supported", prefix));
-
-                Hash |= 1 << prefixConfig.Count - offset - 1;
-            }            
         }
 
         public Prefix Merge(Prefix other)

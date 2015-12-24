@@ -124,7 +124,7 @@ namespace UnitTestProject
 
             // Act
             var beforeSocondBuild1 = config.Get<string>("c:k");
-            var beforeSocondBuild2 = config.Get<string>("np-r:k");
+            var beforeSocondBuild2 = config.Get<string>("r:k");
 
             config.InsertPrefix(1, "np");
             config.Build();
@@ -133,7 +133,7 @@ namespace UnitTestProject
 
             // Assert
             Assert.AreEqual("-a-c-k", beforeSocondBuild1);
-            Assert.AreEqual("-a-np-r-k", beforeSocondBuild2);
+            Assert.AreEqual("r-k", beforeSocondBuild2);
             Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
         }
 
@@ -141,13 +141,58 @@ namespace UnitTestProject
         public void TestVersionRange()
         {
             // Arrange
-            var config = CreateConfig(new[] {TestData.DataWithVersions}, _prefixes);
+            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
+            config.SetApplicationVersion(new Version(1,0,0,0));
+            config.Build();
 
             // Act
             var key1 = config.Get<string>("key1");
 
             // Assert
             Assert.AreEqual("value2", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeIntersetVersions1()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions2 }, _prefixes);
+            config.SetApplicationVersion(new Version(1, 0, 0, 0));
+            config.Build();
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value1", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeIntersetVersions2()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions3 }, _prefixes);
+            config.SetApplicationVersion(new Version(1, 0, 0, 0));
+            config.Build();
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value2", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeWithoutApplicationVersion()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value3", key1);
         }
     }
 }

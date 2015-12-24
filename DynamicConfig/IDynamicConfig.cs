@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
     public interface IDynamicConfig
     {
+        void SetApplicationVersion(Version version);
         void SetPrefixes(params string[] prefixes);
         void InsertPrefix(int index, string prefix);
         void Build();

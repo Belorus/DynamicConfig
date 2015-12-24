@@ -1,9 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
-    internal partial class ConfigKey
+    internal partial class ConfigKey : IComparable<ConfigKey>
     {
+        public int CompareTo(ConfigKey other)
+        {
+            var result = Prefix.CompareTo(other.Prefix);
+            if (result == 0)
+            {
+                result = VersionRange.CompareTo(other.VersionRange);
+            }
+            return result;
+        }
+
         public class StrictEqualityComparer : IEqualityComparer<ConfigKey>
         {
             private static readonly IEqualityComparer<ConfigKey> Instance = new StrictEqualityComparer();
@@ -57,5 +68,6 @@ namespace DynamicConfig
                 }
             }
         }
+
     }
 }

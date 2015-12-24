@@ -40,13 +40,11 @@
       <DependentUpon>ConfigKey.cs</DependentUpon>
     </Compile>
     <Compile Include="ConfigKey.cs" />
-    <Compile Include="ConfigKey.parser.cs">
-      <DependentUpon>ConfigKey.cs</DependentUpon>
-    </Compile>
     <Compile Include="ConfigReader.cs" />
     <Compile Include="DynamicConfig.cs" />
     <Compile Include="DynamicConfigFactory.cs" />
     <Compile Include="IDynamicConfig.cs" />
+    <Compile Include="ConfigKeyBuilder.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Prefix.cs" />
     <Compile Include="PrefixConfig.cs" />

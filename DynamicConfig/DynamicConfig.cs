@@ -8,16 +8,16 @@ namespace DynamicConfig
 {
     internal class DynamicConfig : IDynamicConfig
     {
-        private readonly Version _applicationVersion;
+        
         private readonly List<Dictionary<object, object>> _configs;
         private readonly List<string> _prefixes;
-        private PrefixConfig _prefixConfig;
+        private PrefixBuilder _prefixBuilder;
 
         private Dictionary<string, object> _config;
+        private Version _applicationVersion;
 
-        public DynamicConfig(Version applicationVersion, params Stream[] configs)
+        public DynamicConfig(params Stream[] configs)
         {
-            _applicationVersion = applicationVersion;
             _configs = new List<Dictionary<object, object>>(configs.Length);
             foreach (var config in configs)
             {
@@ -33,6 +33,11 @@ namespace DynamicConfig
             _prefixes = new List<string>();
         }
 
+        public void SetApplicationVersion(Version version)
+        {
+            _applicationVersion = version;
+        }
+
         public void SetPrefixes(params string[] prefixes)
         {
             _prefixes.AddRange(prefixes);
@@ -45,9 +50,9 @@ namespace DynamicConfig
 
         public void Build()
         {
-            _prefixConfig = new PrefixConfig(_prefixes);
+            _prefixBuilder = new PrefixBuilder(_prefixes);
 
-            var configReader = new ConfigReader(_configs, _prefixConfig, _applicationVersion);
+            var configReader = new ConfigReader(_configs, _prefixBuilder, _applicationVersion);
 
             _config = configReader.ParseConfig();
         }

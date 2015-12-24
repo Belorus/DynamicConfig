@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,7 @@ namespace UnitTestProject
     {
         protected IDynamicConfig CreateConfig(string[] cfg, string[] prefixes)
         {
-            var config = DynamicConfigFactory.CreateConfig(new Version(1,0,0,0), cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
+            var config = DynamicConfigFactory.CreateConfig(cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
             config.SetPrefixes(prefixes);
             config.Build();
             return config;
@@ -26,9 +25,9 @@ namespace UnitTestProject
             if (!prefixes.Any())
                 return key;
             return
-                ConfigKey.PrefixSeparator +
-                string.Join(ConfigKey.PrefixSeparator.ToString(), prefixes) +
-                ConfigKey.PrefixSeparator +
+                ConfigKeyBuilder.PrefixSeparator +
+                string.Join(ConfigKeyBuilder.PrefixSeparator.ToString(), prefixes) +
+                ConfigKeyBuilder.PrefixSeparator +
                 key;
         }
     }
