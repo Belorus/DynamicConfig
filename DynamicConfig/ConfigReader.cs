@@ -9,6 +9,12 @@ namespace DynamicConfig
         private readonly List<Dictionary<object, object>> _configs;
         private readonly ConfigKeyBuilder _keyBuilder;
 
+        private class ConfigKeyValue
+        {
+            public ConfigKey Key;
+            public object Value;
+        }
+
         public ConfigReader(List<Dictionary<object, object>> configs, PrefixBuilder prefixBuilder, Version version)
         {
             _configs = configs;
@@ -17,85 +23,53 @@ namespace DynamicConfig
 
         public Dictionary<string, object> ParseConfig()
         {
-            var parsedConfig = new Dictionary<string, object>();
+            var parsedConfig = new Dictionary<ConfigKey, ConfigKeyValue>(ConfigKey.KeyEqualityComparer.Comparer);
 
-            List<KeyValuePair<ConfigKey, object>> mergedConfigs = new List<KeyValuePair<ConfigKey, object>>();
             foreach (var config in _configs)
             {
-                foreach (var kv in config)
-                {
-                    ConfigKey configKey;
-                    if (_keyBuilder.TryCreate(kv.Key.ToString(), out configKey))
-                    {
-                        mergedConfigs.Add(new KeyValuePair<ConfigKey, object>(configKey, kv.Value));
-                    }
-                }
+                ParseRecursive(config, parsedConfig, null);
             }
 
-            mergedConfigs
-            .GroupBy(
-                c => c.Key,
-                (k, v) => GroupRecursive(k, v, parsedConfig),
-                ConfigKey.KeyEqualityComparer.Comparer).ToList();
-
-            return parsedConfig;
+            return parsedConfig.ToDictionary(kv => kv.Key.Key, kv => kv.Value.Value);
         }
 
-        private KeyValuePair<ConfigKey, object> GroupRecursive(ConfigKey key, IEnumerable<KeyValuePair<ConfigKey, object>> values, IDictionary<string, object> parsedConfig)
+        private void ParseRecursive(Dictionary<object, object> rawConfig, Dictionary<ConfigKey, ConfigKeyValue> config, ConfigKey parentKey)
         {
-            var items = values.ToList();
-            var dictionary = new Dictionary<ConfigKey, object>(ConfigKey.StrictEqualityComparer.Comparer);
-
-            bool hasSimpleType = false;
-
-            foreach (var pair in items)
+            foreach (var pair in rawConfig)
             {
-                var value = pair.Value as IDictionary<object, object>;
-                if (value != null)
+                ConfigKey key;
+                if (_keyBuilder.TryCreate(pair.Key.ToString(), out key))
                 {
-                    foreach (var o in value)
+                    key = parentKey != null ? parentKey.Merge(key) : key;
+                    object value = pair.Value;
+
+                    var dict = value as Dictionary<object, object>;
+                    if (dict != null)
                     {
-                        ConfigKey objectKey;
-                        if (_keyBuilder.TryCreate(o.Key.ToString(), out objectKey))
+                        ParseRecursive(dict, config, key);
+                    }
+                    else
+                    {
+                        ConfigKeyValue kv;
+                        if (config.TryGetValue(key, out kv))
                         {
-                            var newKey = ConfigKey.Merge(pair.Key, objectKey);
-                            dictionary.Add(newKey, o.Value);
+                            if (key.CompareTo(kv.Key) > 0)
+                            {
+                                kv.Key = key;
+                                kv.Value = value;
+                            }
+                        }
+                        else
+                        {
+                            config[key] = new ConfigKeyValue
+                            {
+                                Key = key,
+                                Value = value
+                            };
                         }
                     }
                 }
-                else
-                {
-                    hasSimpleType = true;
-                }
             }
-
-            object result = null;
-            if (hasSimpleType)
-            {
-                result = items.Aggregate((i1, i2) => i1.Key.CompareTo(i2.Key) > 0 ? i1 : i2).Value;
-
-                if (result is IDictionary<object, object>)
-                {
-                    //TODO: maybe better throw exception?
-                    hasSimpleType = false;
-                }
-                else
-                {
-                    parsedConfig.Add(key.Key, result);
-                }
-            }
-
-            if (!hasSimpleType)
-            {
-                result = dictionary
-                    .GroupBy(
-                        c => c.Key,
-                        (k, v) => GroupRecursive(k, v, parsedConfig),
-                        ConfigKey.KeyEqualityComparer.Comparer)
-                    .ToDictionary(kv => kv.Key, kv => kv.Value);
-            }
-
-            return new KeyValuePair<ConfigKey, object>(key, result);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject
@@ -135,6 +136,18 @@ namespace UnitTestProject
             Assert.AreEqual("-a-c-k", beforeSocondBuild1);
             Assert.AreEqual("r-k", beforeSocondBuild2);
             Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
+        public void DifferentValueTypeTest()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+            CreateConfig(new[] {TestData.Data5}, _prefixes);
         }
 
         [TestMethod]

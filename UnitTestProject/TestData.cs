@@ -17,9 +17,6 @@ a:
         public const string Data2 = @"
 a:
     b: a-b
-    a: a-a
--a-a:
-    b: -a-a-b
     a:
         c:
             e: -a-a-a-c-e
@@ -51,6 +48,13 @@ r:
     k: -np-r-k
 -a-np-r:
     k: -a-np-r-k
+";
+
+        public const string Data5 = @"
+key: value
+-a-key:
+    key1: value1
+    key2: value2
 ";
 
         public const string DataWithoutRoot = @"

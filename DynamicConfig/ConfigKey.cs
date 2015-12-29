@@ -1,4 +1,3 @@
-
 namespace DynamicConfig
 {
     internal partial class ConfigKey
@@ -35,5 +34,4 @@ namespace DynamicConfig
             return  string.Format("[{0}{1} : {2}]", Key, VersionRange, Prefix);
         }
     }
-        
 }

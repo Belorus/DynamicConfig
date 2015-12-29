@@ -42,6 +42,7 @@
     <Compile Include="ConfigKey.cs" />
     <Compile Include="ConfigReader.cs" />
     <Compile Include="DynamicConfig.cs" />
+    <Compile Include="DynamicConfigException.cs" />
     <Compile Include="DynamicConfigFactory.cs" />
     <Compile Include="IDynamicConfig.cs" />
     <Compile Include="ConfigKeyBuilder.cs" />
