@@ -51,6 +51,13 @@ r:
 ";
 
         public const string Data5 = @"
+-a-key:
+    key1: value1
+    key2: value2
+key: value
+";
+
+        public const string Data6 = @"
 key: value
 -a-key:
     key1: value1

@@ -151,6 +151,18 @@ namespace UnitTestProject
         }
 
         [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
+        public void DifferentValueTypeTest2()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+            CreateConfig(new[] { TestData.Data6 }, _prefixes);
+        }
+
+        [TestMethod]
         public void TestVersionRange()
         {
             // Arrange
