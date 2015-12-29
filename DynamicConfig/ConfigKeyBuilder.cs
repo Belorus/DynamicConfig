@@ -102,7 +102,7 @@ namespace DynamicConfig
                     case ParserState.EndVersion:
                         if (current == PrefixSeparator)
                         {
-                            if (VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange) && !versionRange.InRange(_version))
+                            if (!VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange) || !versionRange.InRange(_version))
                             {
                                 configKey = null;
                                 return false;

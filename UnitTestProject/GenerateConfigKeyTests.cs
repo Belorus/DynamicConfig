@@ -96,5 +96,20 @@ namespace UnitTestProject
             Assert.AreEqual("key", key.Key);
             Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b", "c" }), key.Prefix);
         }
+
+        [TestMethod]
+        public void KeyGeneratorWithInvalidVersionRangePrefixes()
+        {
+            // Arrange
+            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.fail)", "c");
+
+            // Act
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
+
+            // Assert
+            Assert.IsFalse(result);
+            Assert.IsNull(key);
+        }
     }
 }
