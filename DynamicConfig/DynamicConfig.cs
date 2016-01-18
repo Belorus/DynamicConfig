@@ -8,7 +8,6 @@ namespace DynamicConfig
 {
     internal class DynamicConfig : IDynamicConfig
     {
-        
         private readonly List<Dictionary<object, object>> _configs;
         private readonly List<string> _prefixes;
         private PrefixBuilder _prefixBuilder;

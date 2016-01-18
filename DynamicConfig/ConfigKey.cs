@@ -24,7 +24,7 @@ namespace DynamicConfig
 
         public static ConfigKey Merge(ConfigKey first, ConfigKey second)
         {
-            var newKey = string.Format("{0}:{1}", first.Key, second.Key);
+            var newKey = first.Key + ":" + second.Key;
             var newPrefix = Prefix.Merge(first.Prefix, second.Prefix);
             return new ConfigKey(newKey, newPrefix, second.VersionRange);
         }

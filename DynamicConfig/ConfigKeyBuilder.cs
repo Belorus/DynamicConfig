@@ -102,7 +102,12 @@ namespace DynamicConfig
                     case ParserState.EndVersion:
                         if (current == PrefixSeparator)
                         {
-                            if (!VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange) || !versionRange.InRange(_version))
+                            if (!VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange))
+                            {
+                                configKey = null;
+                                throw new DynamicConfigException(string.Format("Invalid key format: {0}", key));
+                            }
+                            if (!versionRange.InRange(_version))
                             {
                                 configKey = null;
                                 return false;
@@ -126,7 +131,7 @@ namespace DynamicConfig
             }
 
             configKey = null;
-            return false;
+            throw new DynamicConfigException(string.Format("Invalid key format: {0}", key));
         }
     }
 }

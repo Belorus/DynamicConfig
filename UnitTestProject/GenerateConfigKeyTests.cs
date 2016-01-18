@@ -98,6 +98,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
         public void KeyGeneratorWithInvalidVersionRangePrefixes()
         {
             // Arrange
@@ -108,8 +109,6 @@ namespace UnitTestProject
             var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsFalse(result);
-            Assert.IsNull(key);
         }
     }
 }
