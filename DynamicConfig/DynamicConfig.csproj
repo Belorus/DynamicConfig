@@ -51,6 +51,7 @@
     <Compile Include="PrefixConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VersionRange.cs" />
+    <Compile Include="SharpYaml\EmptyAttributeRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SharpYaml">

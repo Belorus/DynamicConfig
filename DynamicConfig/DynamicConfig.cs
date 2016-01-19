@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using DynamicConfig.SharpYaml;
 using SharpYaml.Serialization;
 
 namespace DynamicConfig
@@ -18,11 +19,11 @@ namespace DynamicConfig
         public DynamicConfig(params Stream[] configs)
         {
             _configs = new List<Dictionary<object, object>>(configs.Length);
+            var formatter = new Serializer(new SerializerSettings {Attributes = new EmptyAttributeRegistry(), EmitAlias = false});
             foreach (var config in configs)
             {
                 using (var reader = new StreamReader(config, Encoding.UTF8, true, 1024, true))
                 {
-                    var formatter = new Serializer(new SerializerSettings() {EmitAlias = false});
                     var dict = formatter.Deserialize<Dictionary<object, object>>(reader);
                     if (dict != null)
                         _configs.Add(dict);
