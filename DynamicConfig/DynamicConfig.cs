@@ -10,11 +10,8 @@ namespace DynamicConfig
     internal class DynamicConfig : IDynamicConfig
     {
         private readonly List<Dictionary<object, object>> _configs;
-        private readonly List<string> _prefixes;
-        private PrefixBuilder _prefixBuilder;
 
         private Dictionary<string, object> _config;
-        private Version _applicationVersion;
 
         public DynamicConfig(params Stream[] configs)
         {
@@ -29,30 +26,14 @@ namespace DynamicConfig
                         _configs.Add(dict);
                 }
             }
-
-            _prefixes = new List<string>();
         }
 
-        public void SetApplicationVersion(Version version)
+        public void Build(DynamicConfigOptions options)
         {
-            _applicationVersion = version;
-        }
+            IPrefixBuilder prefixBuilder = options.IgnorePrefixes ? (IPrefixBuilder)new EmptyPrefixBuilder() : new PrefixBuilder(options.Prefixes);
+            IComparer<Version> versionComparer = options.IgnoreVersions ? VersionComparer.NullComparer : options.VersionComparer ?? VersionComparer.Default;
 
-        public void SetPrefixes(params string[] prefixes)
-        {
-            _prefixes.AddRange(prefixes);
-        }
-
-        public void InsertPrefix(int index, string prefix)
-        {
-            _prefixes.Insert(index, prefix);
-        }
-
-        public void Build()
-        {
-            _prefixBuilder = new PrefixBuilder(_prefixes);
-
-            var configReader = new ConfigReader(_configs, _prefixBuilder, _applicationVersion);
+            var configReader = new ConfigReader(_configs, prefixBuilder, options.AppVersion, versionComparer);
 
             _config = configReader.ParseConfig();
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,7 +13,7 @@ namespace UnitTestProject
         [TestInitialize]
         public void Initialize()
         {
-            _keyBuilder = new ConfigKeyBuilder(_prefixBuilder, new Version(1,0));
+            _keyBuilder = new ConfigKeyBuilder(_prefixBuilder);
         }
 
         [TestMethod]

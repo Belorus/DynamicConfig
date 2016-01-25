@@ -3,20 +3,28 @@ using System.Collections.Generic;
 
 namespace DynamicConfig
 {
-    internal class PrefixBuilder
+    internal interface IPrefixBuilder
+    {
+        bool Contains(string prefix);
+        Prefix Create(List<string> prefixes);
+    }
+
+    internal class PrefixBuilder : IPrefixBuilder
     {
         private readonly Dictionary<string, int> _prefixes;
         private readonly int _count;
 
-        public PrefixBuilder(List<string> prefixes)
+        public PrefixBuilder(ICollection<string> prefixes)
         {
             if (prefixes.Count > 32)
                 throw new NotSupportedException("Max 32 prefixes");
 
             _prefixes = new Dictionary<string, int>(prefixes.Count);
-            for (var i = 0; i < prefixes.Count; i++)
+            int index = 0;
+            foreach (var prefix in prefixes)
             {
-                _prefixes[prefixes[i]] = i;
+                _prefixes[prefix] = index;
+                index++;
             }
             _count = _prefixes.Count;
         }

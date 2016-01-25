@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DynamicConfig
 {
@@ -9,8 +8,7 @@ namespace DynamicConfig
         internal const char OpenVersionRange = '(';
         internal const char CloseVersionRange = ')';
 
-        private readonly PrefixBuilder _prefixBuilder;
-        private readonly Version _version;
+        private readonly IPrefixBuilder _prefixBuilder;
 
         private enum ParserState
         {
@@ -22,10 +20,9 @@ namespace DynamicConfig
             EndVersion
         }
 
-        public ConfigKeyBuilder(PrefixBuilder prefixBuilder, Version version)
+        public ConfigKeyBuilder(IPrefixBuilder prefixBuilder)
         {
             _prefixBuilder = prefixBuilder;
-            _version = version;
         }
 
         public bool TryCreate(string key, out ConfigKey configKey)
@@ -106,11 +103,6 @@ namespace DynamicConfig
                             {
                                 configKey = null;
                                 throw new DynamicConfigException(string.Format("Invalid key format: {0}", key));
-                            }
-                            if (!versionRange.InRange(_version))
-                            {
-                                configKey = null;
-                                return false;
                             }
                             tokenLength = 0;
                             state = ParserState.PrefixSeparator;

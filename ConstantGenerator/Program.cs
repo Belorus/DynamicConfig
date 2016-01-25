@@ -18,8 +18,13 @@ namespace ConstantGenerator
             {
                 var files = options.InputConfigPath.Split(',').Select(File.OpenRead).OfType<Stream>().ToArray();
                 var config = DynamicConfigFactory.CreateConfig(files);
-                config.SetPrefixes(options.Prefixes.Split(',',';'));
-                config.Build();
+                
+                var configOptions = new DynamicConfigOptions
+                {
+                    IgnorePrefixes = true,
+                    IgnoreVersions = true
+                };
+                config.Build(configOptions);
 
                 string code = GenerateCode(options.Namespace, options.ClassName, config.AllKeys);
                 File.WriteAllText(options.OutputClassPath, code);

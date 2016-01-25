@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
@@ -19,18 +20,18 @@ namespace DynamicConfig
             _isEmpty = true;
         }
 
-        private VersionRange(Version from, Version to)
+        private VersionRange(Version @from, Version to)
         {
             _from = @from;
             _to = to;
         }
 
-        public bool InRange(Version version)
+        public bool InRange(Version version, IComparer<Version> comparer)
         {
             if (version == null)
-                return false;
+                return _isEmpty;
 
-            return _from <= version && version <= _to;
+            return comparer.Compare(_from, version) <= 0 && comparer.Compare(version, _to) <= 0;
         }
 
         public int CompareTo(VersionRange other)

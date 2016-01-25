@@ -13,9 +13,11 @@ namespace UnitTestProject
         [TestMethod]
         public void KeyCompareTest()
         {
-            var key1 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a", "b" }));
-            var key2 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a" }));
-            var key3 = new ConfigKey("ttt", _prefixBuilder.Create(new List<string> { "a", "b" }));
+            VersionRange range;
+            VersionRange.TryParse("1.0.0.0", out range);
+            var key1 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a", "b" }), range);
+            var key2 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a" }), range);
+            var key3 = new ConfigKey("ttt", _prefixBuilder.Create(new List<string> { "a", "b" }), range);
 
             Assert.IsTrue (ConfigKey.KeyEqualityComparer.Comparer.Equals(key1, key2));
             Assert.IsFalse(ConfigKey.KeyEqualityComparer.Comparer.Equals(key2, key3));

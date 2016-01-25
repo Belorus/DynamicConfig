@@ -10,8 +10,7 @@ namespace UnitTestProject
         protected IDynamicConfig CreateConfig(string[] cfg, string[] prefixes)
         {
             var config = DynamicConfigFactory.CreateConfig(cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
-            config.SetPrefixes(prefixes);
-            config.Build();
+            config.Build(new DynamicConfigOptions{Prefixes = prefixes});
             return config;
         }
 

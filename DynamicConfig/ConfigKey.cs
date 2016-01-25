@@ -6,10 +6,6 @@ namespace DynamicConfig
         public readonly Prefix Prefix;
         public readonly VersionRange VersionRange;
 
-        public ConfigKey(string key, Prefix prefix) : this(key, prefix, VersionRange.Empty)
-        {
-        }
-
         public ConfigKey(string key, Prefix prefix, VersionRange versionRange)
         {
             Key = key;

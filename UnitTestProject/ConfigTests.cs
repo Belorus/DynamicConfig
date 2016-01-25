@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -67,7 +68,7 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.SimpleData, TestData.SimpleDataExtension }, _prefixes);
 
             // Act
-            config.Build();
+            config.Build(new DynamicConfigOptions { Prefixes = new[] { TestData.SimpleData, TestData.SimpleDataExtension } });
 
             // Assert
             Assert.AreEqual("test", config.Get<string>("a:b"));
@@ -127,8 +128,9 @@ namespace UnitTestProject
             var beforeSocondBuild1 = config.Get<string>("c:k");
             var beforeSocondBuild2 = config.Get<string>("r:k");
 
-            config.InsertPrefix(1, "np");
-            config.Build();
+            var prefixes = new List<string>(_prefixes);
+            prefixes.Insert(1, "np");
+            config.Build(new DynamicConfigOptions{Prefixes = prefixes});
 
             var afterSecondBuild1 = config.Get<string>("r:k");
 
@@ -167,8 +169,7 @@ namespace UnitTestProject
         {
             // Arrange
             var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
-            config.SetApplicationVersion(new Version(1,0,0,0));
-            config.Build();
+            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
 
             // Act
             var key1 = config.Get<string>("key1");
@@ -182,8 +183,7 @@ namespace UnitTestProject
         {
             // Arrange
             var config = CreateConfig(new[] { TestData.DataWithVersions2 }, _prefixes);
-            config.SetApplicationVersion(new Version(1, 0, 0, 0));
-            config.Build();
+            config.Build(new DynamicConfigOptions{Prefixes = _prefixes, AppVersion = new  Version(1, 0, 0, 0)});
 
             // Act
             var key1 = config.Get<string>("key1");
@@ -197,8 +197,7 @@ namespace UnitTestProject
         {
             // Arrange
             var config = CreateConfig(new[] { TestData.DataWithVersions3 }, _prefixes);
-            config.SetApplicationVersion(new Version(1, 0, 0, 0));
-            config.Build();
+            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
 
             // Act
             var key1 = config.Get<string>("key1");

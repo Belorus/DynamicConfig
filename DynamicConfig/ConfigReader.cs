@@ -8,6 +8,9 @@ namespace DynamicConfig
         private readonly List<Dictionary<object, object>> _configs;
         private readonly ConfigKeyBuilder _keyBuilder;
 
+        private readonly Version _appVersion;
+        private readonly IComparer<Version> _versionComparer;
+
         private class ConfigKeyItem
         {
             public ConfigKey Key;
@@ -18,10 +21,12 @@ namespace DynamicConfig
             public object Value;
         }
 
-        public ConfigReader(List<Dictionary<object, object>> configs, PrefixBuilder prefixBuilder, Version version)
+        public ConfigReader(List<Dictionary<object, object>> configs, IPrefixBuilder prefixBuilder, Version appVersion, IComparer<Version> versionComparer)
         {
             _configs = configs;
-            _keyBuilder = new ConfigKeyBuilder(prefixBuilder, version);
+            _appVersion = appVersion;
+            _versionComparer = versionComparer;
+            _keyBuilder = new ConfigKeyBuilder(prefixBuilder);
         }
 
         public Dictionary<string, object> ParseConfig()
@@ -57,6 +62,11 @@ namespace DynamicConfig
                 {
                     key = parentKey != null ? parentKey.Merge(key) : key;
                     object value = pair.Value;
+
+                    if (!key.VersionRange.InRange(_appVersion, _versionComparer))
+                    {
+                        continue;
+                    }
 
                     ConfigKeyItem keyItem;
                     bool keyExists = config.TryGetValue(key, out keyItem);
