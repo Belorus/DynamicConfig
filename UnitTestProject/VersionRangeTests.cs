@@ -114,14 +114,14 @@ namespace UnitTestProject
             VersionRange.TryParse(version3, out versionRange3);
 
             // Assert
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0"), VersionComparer.WeakComparer));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0"), VersionComparer.WeakComparer));
-            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0.0"), VersionComparer.WeakComparer));
+            Assert.IsTrue(versionRange1.InRange(new Version("1.0"), VersionComparer.Weak));
+            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0"), VersionComparer.Weak));
+            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0.0"), VersionComparer.Weak));
 
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0.0"), VersionComparer.WeakComparer));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0"), VersionComparer.WeakComparer));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0.0"), VersionComparer.WeakComparer));
-            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0"), VersionComparer.WeakComparer));
+            Assert.IsTrue(versionRange1.InRange(new Version("1.0.0"), VersionComparer.Weak));
+            Assert.IsTrue(versionRange2.InRange(new Version("1.0"), VersionComparer.Weak));
+            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0.0"), VersionComparer.Weak));
+            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0"), VersionComparer.Weak));
         }
     }
 }

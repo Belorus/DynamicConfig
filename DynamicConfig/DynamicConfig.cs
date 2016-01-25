@@ -31,7 +31,7 @@ namespace DynamicConfig
         public void Build(DynamicConfigOptions options)
         {
             IPrefixBuilder prefixBuilder = options.IgnorePrefixes ? (IPrefixBuilder)new EmptyPrefixBuilder() : new PrefixBuilder(options.Prefixes);
-            IComparer<Version> versionComparer = options.IgnoreVersions ? VersionComparer.NullComparer : options.VersionComparer ?? VersionComparer.Default;
+            IComparer<Version> versionComparer = options.IgnoreVersions ? VersionComparer.Null : options.VersionComparer ?? VersionComparer.Default;
 
             var configReader = new ConfigReader(_configs, prefixBuilder, options.AppVersion, versionComparer);
 
