@@ -10,8 +10,7 @@ namespace UnitTestProject
         protected IDynamicConfig CreateConfig(string[] cfg, string[] prefixes)
         {
             var config = DynamicConfigFactory.CreateConfig(cfg.Select(c => new MemoryStream(Encoding.UTF8.GetBytes(c))).Cast<Stream>().ToArray());
-            config.SetPrefixes(prefixes);
-            config.Build();
+            config.Build(new DynamicConfigOptions{Prefixes = prefixes});
             return config;
         }
 
@@ -25,9 +24,9 @@ namespace UnitTestProject
             if (!prefixes.Any())
                 return key;
             return
-                DynamicConfig.DynamicConfig.PrefixSeparator +
-                string.Join(DynamicConfig.DynamicConfig.PrefixSeparator.ToString(), prefixes) +
-                DynamicConfig.DynamicConfig.PrefixSeparator +
+                ConfigKeyBuilder.PrefixSeparator +
+                string.Join(ConfigKeyBuilder.PrefixSeparator.ToString(), prefixes) +
+                ConfigKeyBuilder.PrefixSeparator +
                 key;
         }
     }

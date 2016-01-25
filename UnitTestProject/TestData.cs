@@ -17,9 +17,6 @@ a:
         public const string Data2 = @"
 a:
     b: a-b
-    a: a-a
--a-a:
-    b: -a-a-b
     a:
         c:
             e: -a-a-a-c-e
@@ -45,16 +42,49 @@ r:
         public const string Data4 = @"
 -a-c:
     k: -a-c-k
+r:
+    k: r-k
 -np-r:
     k: -np-r-k
 -a-np-r:
     k: -a-np-r-k
 ";
 
+        public const string Data5 = @"
+-a-key:
+    key1: value1
+    key2: value2
+key: value
+";
+
+        public const string Data6 = @"
+key: value
+-a-key:
+    key1: value1
+    key2: value2
+";
+
         public const string DataWithoutRoot = @"
 key1: key1
 key2: key2
 key3: key3
-";        
+";
+
+        public const string DataWithVersions1 = @"
+-(0.5.0-0.6.0)-key1: value1
+key1               : value3
+-(0.5.0-2.0.0)-key1: value2
+";
+        public const string DataWithVersions2 = @"
+-(0.6.0-1.6.0)-key1: value1
+key1               : value3
+-(0.5.0-2.0.0)-key1: value2
+";
+
+        public const string DataWithVersions3 = @"
+-(0.5.0-1.6.0)-key1: value1
+key1               : value3
+-(0.5.0-2.0.0)-key1: value2
+";
     }
 }

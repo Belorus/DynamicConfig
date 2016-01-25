@@ -58,6 +58,7 @@
     <Compile Include="PrefixTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestData.cs" />
+    <Compile Include="VersionRangeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DynamicConfig\DynamicConfig.csproj">
