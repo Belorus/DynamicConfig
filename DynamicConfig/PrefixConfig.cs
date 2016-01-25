@@ -16,17 +16,25 @@ namespace DynamicConfig
 
         public PrefixBuilder(ICollection<string> prefixes)
         {
-            if (prefixes.Count > 32)
-                throw new NotSupportedException("Max 32 prefixes");
-
-            _prefixes = new Dictionary<string, int>(prefixes.Count);
-            int index = 0;
-            foreach (var prefix in prefixes)
+            if (prefixes != null)
             {
-                _prefixes[prefix] = index;
-                index++;
+                if (prefixes.Count > 32)
+                    throw new NotSupportedException("Max 32 prefixes");
+
+                _prefixes = new Dictionary<string, int>(prefixes.Count);
+                int index = 0;
+                foreach (var prefix in prefixes)
+                {
+                    _prefixes[prefix] = index;
+                    index++;
+                }
+                _count = _prefixes.Count;
             }
-            _count = _prefixes.Count;
+            else
+            {
+                _prefixes = new Dictionary<string, int>(0);
+                _count = 0;
+            }
         }
 
         private int IndexOf(string prefix)
