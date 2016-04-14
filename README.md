@@ -13,17 +13,17 @@ Here is a sample from my application:
     http:
         -DEV-timeout:                       30
         timeout:                            10
-        -Android-handler_type:              Default
-        handler_type:                       Default
+        -Android-reconnection_strategy:     Default
+        reconnection_strategy:              Default
     
-    remote_resources:
-        skip_zip_header_verification:       false
-        -WP8-skip_zip_header_verification:  true
+    resources:
+        zip_header_verification:            false
+        -DEV-zip_header_verification:       true
     
     auto_login:
         timeout:                            30
         -2110-timeout:                      30
-        force_relogin_percent:              0
+        force_relogin:                      0
         show_force_relogin_popup:           false
 
 
