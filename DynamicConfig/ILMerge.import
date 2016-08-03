@@ -1,0 +1,18 @@
+<Project 
+ DefaultTargets="Build" 
+ xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+ <Target Name="AfterBuild">
+   <CreateItem Include="@(ReferencePath)" Condition="'%(CopyLocal)'=='true'">
+       <Output TaskParameter="Include" ItemName="IlmergeAssemblies"/>
+   </CreateItem>
+
+   <Message Text="MERGING: @(IlmergeAssemblies->'%(Filename)')" Importance="High" /> 
+
+  <Exec Command="&quot;$(ProgramFiles)\Microsoft\Ilmerge\Ilmerge.exe&quot; /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(IlmergeAssemblies->'&quot;%(FullPath)&quot;', ' ') /log:ILMerge.log /targetplatform:v4,C:\Windows\Microsoft.NET\Framework64\v4.0.30319" /> 
+
+ </Target>
+
+ <Target Name="_CopyFilesMarkedCopyLocal"/>
+
+</Project>
