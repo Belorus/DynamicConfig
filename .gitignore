@@ -4,3 +4,4 @@ TestResults/
 *.DS_Store
 *.csproj.user
 *.suo
+packages/
