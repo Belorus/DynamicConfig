@@ -1,5 +1,4 @@
-﻿<#@ template debug="true" hostSpecific="true" #>
-<#@ output extension=".cs" #>
+﻿<#@ template language="C#" visibility="internal" linePragmas="false" debug="false" #>
 <#@ Assembly Name="System.Core" #>
 <#@ Assembly Name="System.Windows.Forms" #>
 <#@ import namespace="System" #>
