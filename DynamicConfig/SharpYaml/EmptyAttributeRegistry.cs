@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using SharpYaml.Serialization;
+using SharpYaml.Serialization.Descriptors;
 
 namespace DynamicConfig.SharpYaml
 {
@@ -18,6 +19,6 @@ namespace DynamicConfig.SharpYaml
         }
 
         public Func<Attribute, Attribute> AttributeRemap { get; set; }
-        public Action<Type, List<IMemberDescriptor>> PrepareMembersCallback { get; set; }
+        public Action<ObjectDescriptor, List<IMemberDescriptor>> PrepareMembersCallback { get; set; }
     }
 }
