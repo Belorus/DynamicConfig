@@ -29,7 +29,7 @@ namespace ConstantGenerator
         {
             this.Write("namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(_ns));
-            this.Write(" \r\n{\r\n    public class ");
+            this.Write("\r\n{\r\n    public class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(_className));
             this.Write("\r\n    {\r\n");
  
@@ -38,7 +38,7 @@ namespace ConstantGenerator
 WriteLine("        public const string " + kv.Key + " = \"" + kv.Value + "\";");
         }
         
-            this.Write("    }\r\n}\r\n");
+            this.Write("    }\r\n}");
             return this.GenerationEnvironment.ToString();
         }
     }
