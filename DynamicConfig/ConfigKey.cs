@@ -1,15 +1,16 @@
-
 namespace DynamicConfig
 {
     internal partial class ConfigKey
     {
-        public string Key { get; private set; }
-        public Prefix Prefix { get; private set; }
+        public readonly string Key;
+        public readonly Prefix Prefix;
+        public readonly VersionRange VersionRange;
 
-        public ConfigKey(string key, Prefix prefix)
+        public ConfigKey(string key, Prefix prefix, VersionRange versionRange)
         {
             Key = key;
             Prefix = prefix;
+            VersionRange = versionRange;
         }
 
         public ConfigKey Merge(ConfigKey other)
@@ -19,15 +20,14 @@ namespace DynamicConfig
 
         public static ConfigKey Merge(ConfigKey first, ConfigKey second)
         {
-            var newKey = string.Format("{0}:{1}", first.Key, second.Key);
+            var newKey = first.Key + ":" + second.Key;
             var newPrefix = Prefix.Merge(first.Prefix, second.Prefix);
-            return new ConfigKey(newKey, newPrefix);
+            return new ConfigKey(newKey, newPrefix, second.VersionRange);
         }
 
         public override string ToString()
         {
-            return  string.Format("[{0} : {1}]", Key, Prefix);
+            return  string.Format("[{0}{1} : {2}]", Key, VersionRange, Prefix);
         }
     }
-        
 }

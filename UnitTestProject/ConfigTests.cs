@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject
@@ -39,10 +42,10 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.Data2, _prefixes);
 
             // Act
-            var groups = config.ParseConfig();
+            var groups = config.AllKeys;
 
             // Assert
-            Assert.AreEqual(7, groups.Count);
+            Assert.AreEqual(7, groups.Count());
         }
 
         [TestMethod]
@@ -52,10 +55,10 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.Data2, TestData.Data3 }, _prefixes);
 
             // Act
-            var groups = config.ParseConfig();
+            var groups = config.AllKeys;;
 
             // Assert
-            Assert.AreEqual(8, groups.Count);
+            Assert.AreEqual(8, groups.Count());
         }
 
         [TestMethod]
@@ -65,7 +68,7 @@ namespace UnitTestProject
             var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.SimpleData, TestData.SimpleDataExtension }, _prefixes);
 
             // Act
-            config.Build();
+            config.Build(new DynamicConfigOptions { Prefixes = new[] { TestData.SimpleData, TestData.SimpleDataExtension } });
 
             // Assert
             Assert.AreEqual("test", config.Get<string>("a:b"));
@@ -123,17 +126,97 @@ namespace UnitTestProject
 
             // Act
             var beforeSocondBuild1 = config.Get<string>("c:k");
-            var beforeSocondBuild2 = config.Get<string>("np-r:k");
+            var beforeSocondBuild2 = config.Get<string>("r:k");
 
-            config.InsertPrefix(1, "np");
-            config.Build();
+            var prefixes = new List<string>(_prefixes);
+            prefixes.Insert(1, "np");
+            config.Build(new DynamicConfigOptions{Prefixes = prefixes});
 
             var afterSecondBuild1 = config.Get<string>("r:k");
 
             // Assert
             Assert.AreEqual("-a-c-k", beforeSocondBuild1);
-            Assert.AreEqual("-a-np-r-k", beforeSocondBuild2);
+            Assert.AreEqual("r-k", beforeSocondBuild2);
             Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
+        public void DifferentValueTypeTest()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+            CreateConfig(new[] {TestData.Data5}, _prefixes);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
+        public void DifferentValueTypeTest2()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+            CreateConfig(new[] { TestData.Data6 }, _prefixes);
+        }
+
+        [TestMethod]
+        public void TestVersionRange()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
+            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value2", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeIntersectVersions1()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions2 }, _prefixes);
+            config.Build(new DynamicConfigOptions{Prefixes = _prefixes, AppVersion = new  Version(1, 0, 0, 0)});
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value1", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeIntersectVersions2()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions3 }, _prefixes);
+            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value1", key1);
+        }
+
+        [TestMethod]
+        public void TestVersionRangeWithoutApplicationVersion()
+        {
+            // Arrange
+            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
+
+            // Act
+            var key1 = config.Get<string>("key1");
+
+            // Assert
+            Assert.AreEqual("value3", key1);
         }
     }
 }

@@ -3,33 +3,65 @@ using System.Collections.Generic;
 
 namespace DynamicConfig
 {
-    internal class PrefixConfig
+    internal interface IPrefixBuilder
     {
-        private readonly Dictionary<string, int> _prefixes; 
+        bool Contains(string prefix);
+        Prefix Create(List<string> prefixes);
+    }
 
-        public PrefixConfig(params string[] prefixes)
+    internal class PrefixBuilder : IPrefixBuilder
+    {
+        private readonly Dictionary<string, int> _prefixes;
+        private readonly int _count;
+
+        public PrefixBuilder(ICollection<string> prefixes)
         {
-            if (prefixes.Length > 32)
-                throw new NotSupportedException("Max 32 prefixes");
-
-            _prefixes = new Dictionary<string, int>(prefixes.Length);
-            for (var i = 0; i < prefixes.Length; i++)
+            if (prefixes != null)
             {
-                _prefixes[prefixes[i]] = i;
+                if (prefixes.Count > 32)
+                    throw new NotSupportedException("Max 32 prefixes");
+
+                _prefixes = new Dictionary<string, int>(prefixes.Count);
+                int index = 0;
+                foreach (var prefix in prefixes)
+                {
+                    _prefixes[prefix] = index;
+                    index++;
+                }
+                _count = _prefixes.Count;
+            }
+            else
+            {
+                _prefixes = new Dictionary<string, int>(0);
+                _count = 0;
             }
         }
 
-        public int Count
-        {
-            get { return _prefixes.Count; }
-        }
-
-        public int GetIndex(string prefix)
+        private int IndexOf(string prefix)
         {
             int index;
             if(_prefixes.TryGetValue(prefix, out index))
                 return index;
             return -1;
+        }
+
+        public bool Contains(string prefix)
+        {
+            return _prefixes.ContainsKey(prefix);
+        }
+
+        public Prefix Create(List<string> prefixes)
+        {
+            int hash = 0;
+            foreach (var prefix in prefixes)
+            {
+                int offset = IndexOf(prefix);
+                if (offset < 0)
+                    throw new NotSupportedException(string.Format("Prefix \"{0}\" doesn't supported", prefix));
+
+                hash |= 1 << _count - offset - 1;
+            }
+            return new Prefix(hash);
         }
     }
 }

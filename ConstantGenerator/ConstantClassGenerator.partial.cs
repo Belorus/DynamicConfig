@@ -2,7 +2,7 @@
 
 namespace ConstantGenerator
 {
-    public partial class ConstantClassGenerator
+    internal partial class ConstantClassGenerator
     {
         private readonly string _ns;
         private readonly string _className;

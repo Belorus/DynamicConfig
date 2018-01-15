@@ -1,5 +1,4 @@
-﻿<#@ template debug="true" hostSpecific="true" #>
-<#@ output extension=".cs" #>
+﻿<#@ template language="C#" visibility="internal" linePragmas="false" debug="false" #>
 <#@ Assembly Name="System.Core" #>
 <#@ Assembly Name="System.Windows.Forms" #>
 <#@ import namespace="System" #>
@@ -8,7 +7,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Collections" #>
 <#@ import namespace="System.Collections.Generic" #>
-namespace <#=_ns#> 
+namespace <#=_ns#>
 {
     public class <#=_className#>
     {

@@ -1,4 +1,5 @@
-﻿using DynamicConfig;
+﻿using System.Collections.Generic;
+using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject
@@ -6,67 +7,107 @@ namespace UnitTestProject
     [TestClass]
     public class GenerateConfigKeyTests : TestsBase
     {
-        private readonly string[] _prefixes = {"a", "b", "c"};
-        private readonly PrefixConfig _prefixConfig = new PrefixConfig("a", "b", "c");
+        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new List<string> {"a", "b", "c"});
+        private ConfigKeyBuilder _keyBuilder;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _keyBuilder = new ConfigKeyBuilder(_prefixBuilder);
+        }
 
         [TestMethod]
         public void KeyGeneratorWithoutPrefixes()
         {
             // Aggange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            string keyString = GenerateKey("key");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("key", result.Key);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
         }
 
         [TestMethod]
         public void KeyGeneratorWithPrefixes()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            string keyString = GenerateKey("key", "a", "b");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "b"));
-
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a", "b"), result.Prefix);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
+            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b" }), key.Prefix);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes1()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            string keyString = GenerateKey("key", "a", "b", "e");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "b", "e"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("e" + DynamicConfig.DynamicConfig.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a", "b"), result.Prefix);
+            Assert.IsFalse(result);
+            Assert.IsNull(key);
         }
 
         [TestMethod]
         public void KeyGeneratorWithInvalidPrefixes2()
         {
             // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.SimpleData, _prefixes);
+            string keyString = GenerateKey("key", "a", "e", "b");
 
             // Act
-            var result = config.GetConfigKey(GenerateKey("key", "a", "e", "b"));
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("e" + DynamicConfig.DynamicConfig.PrefixSeparator + "b" + DynamicConfig.DynamicConfig.PrefixSeparator + "key", result.Key);
-            Assert.AreEqual(new Prefix(_prefixConfig, "a"), result.Prefix);
+            Assert.IsFalse(result);
+            Assert.IsNull(key);
+        }
+
+        [TestMethod]
+        public void KeyGeneratorWithVersionRangePrefixes()
+        {
+            // Arrange
+            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.0)", "c");
+
+            // Act
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsNotNull(key);
+            Assert.AreEqual("key", key.Key);
+            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b", "c" }), key.Prefix);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DynamicConfigException))]
+        public void KeyGeneratorWithInvalidVersionRangePrefixes()
+        {
+            // Arrange
+            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.fail)", "c");
+
+            // Act
+            ConfigKey key;
+            var result = _keyBuilder.TryCreate(keyString, out key);
+
+            // Assert
         }
     }
 }

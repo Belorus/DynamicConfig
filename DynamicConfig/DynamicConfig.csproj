@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
   <PropertyGroup>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -18,6 +19,8 @@
     <OutputPath>..\..\Bin\$(Configuration)\$(Platform)\$(AssemblyName)\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+
+    <SolutionDir Condition=" '$(SolutionDir)' == ''">..\</SolutionDir>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,20 +39,33 @@
     <DefineConstants>TRACE;$(ExtraDefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ConfigKey.comparers.cs" />
+    <Compile Include="ConfigKey.comparers.cs">
+      <DependentUpon>ConfigKey.cs</DependentUpon>
+    </Compile>
     <Compile Include="ConfigKey.cs" />
+    <Compile Include="ConfigReader.cs" />
     <Compile Include="DynamicConfig.cs" />
+    <Compile Include="DynamicConfigException.cs" />
     <Compile Include="DynamicConfigFactory.cs" />
+    <Compile Include="DynamicConfigOptions.cs" />
+    <Compile Include="EmptyPrefixBuilder.cs" />
     <Compile Include="IDynamicConfig.cs" />
-    <Compile Include="Int32Extensions.cs" />
+    <Compile Include="ConfigKeyBuilder.cs" />
+    <Compile Include="TypeExtensions.cs" />
     <Compile Include="Prefix.cs" />
     <Compile Include="PrefixConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VersionComparer.cs" />
+    <Compile Include="VersionRange.cs" />
+    <Compile Include="SharpYaml\EmptyAttributeRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="SharpYaml">
-      <HintPath>..\3rdParty\YAML\SharpYaml.dll</HintPath>
+    <Reference Include="SharpYaml, Version=1.6.1.0, Culture=neutral, PublicKeyToken=1ced8108e942bc02, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)packages\SharpYaml.1.6.1\lib\portable-net40+sl5+win8+wp8+wpa81\SharpYaml.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

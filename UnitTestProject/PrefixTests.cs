@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
 using DynamicConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,15 +8,15 @@ namespace UnitTestProject
     [TestClass]
     public class PrefixTests
     {
-        private readonly PrefixConfig _prefixConfig = new PrefixConfig("DEV", "ios", "iphone", "stageB");
+        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new List<string>{"DEV", "ios", "iphone", "stageB"});
                                                                        
         [TestMethod]
         public void EqualityTest()
         {
-            var p1 = new Prefix(_prefixConfig, "DEV", "iphone");
-            var p2 = new Prefix(_prefixConfig, "DEV");
-            var p3 = new Prefix(_prefixConfig, "stageB");
-            var p4 = new Prefix(_prefixConfig, "DEV", "iphone");
+            var p1 = _prefixBuilder.Create(new List<string> { "DEV", "iphone" });
+            var p2 = _prefixBuilder.Create(new List<string> { "DEV" });
+            var p3 = _prefixBuilder.Create(new List<string> { "stageB" });
+            var p4 = _prefixBuilder.Create(new List<string> { "DEV", "iphone" });
 
             Assert.IsTrue(p1.CompareTo(p2) > 0);
             Assert.IsTrue(p1.CompareTo(p3) > 0);
@@ -28,11 +28,11 @@ namespace UnitTestProject
         [TestMethod]
         public void CompareTest()
         {
-            var p1 = new Prefix(_prefixConfig, "DEV", "iphone");
-            var p2 = new Prefix(_prefixConfig, "DEV");
-            var p3 = new Prefix(_prefixConfig, "stageB");
-            var p4 = new Prefix(_prefixConfig, "DEV", "iphone");
-            var p5 = new Prefix(_prefixConfig, "ios", "iphone");
+            var p1 = _prefixBuilder.Create(new List<string> { "DEV", "iphone" });
+            var p2 = _prefixBuilder.Create(new List<string> { "DEV" });
+            var p3 = _prefixBuilder.Create(new List<string> { "stageB" });
+            var p4 = _prefixBuilder.Create(new List<string> { "DEV", "iphone" });
+            var p5 = _prefixBuilder.Create(new List<string> { "ios", "iphone" });
 
             var prefixes = new [] {p1, p2, p3, p4, p5};
             var max = prefixes.Max();

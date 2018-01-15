@@ -1,34 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicConfig
 {
-    internal partial class ConfigKey
+    internal partial class ConfigKey : IComparable<ConfigKey>
     {
-        public class StrictEqualityComparer : IEqualityComparer<ConfigKey>
+        public int CompareTo(ConfigKey other)
         {
-            private static readonly IEqualityComparer<ConfigKey> Instance = new StrictEqualityComparer();
-
-            public static IEqualityComparer<ConfigKey> Comparer
+            var result = Prefix.CompareTo(other.Prefix);
+            if (result == 0)
             {
-                get { return Instance; }
+                result = VersionRange.CompareTo(other.VersionRange);
             }
-
-            public bool Equals(ConfigKey x, ConfigKey y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
-                return string.Equals(x.Key, y.Key) && Equals(x.Prefix, y.Prefix);
-            }
-
-            public int GetHashCode(ConfigKey obj)
-            {
-                unchecked
-                {
-                    return ((obj.Key != null ? obj.Key.GetHashCode() : 0) * 397) ^ (obj.Prefix != null ? obj.Prefix.GetHashCode() : 0);
-                }
-            }
+            return result;
         }
 
         public class KeyEqualityComparer : IEqualityComparer<ConfigKey>
@@ -57,5 +41,6 @@ namespace DynamicConfig
                 }
             }
         }
+
     }
 }
