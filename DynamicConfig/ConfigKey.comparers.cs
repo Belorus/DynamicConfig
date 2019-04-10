@@ -11,6 +11,10 @@ namespace DynamicConfig
             if (result == 0)
             {
                 result = VersionRange.CompareTo(other.VersionRange);
+                if (result == 0)
+                {
+                    result = Segment.CompareTo(other.Segment);
+                }
             }
             return result;
         }

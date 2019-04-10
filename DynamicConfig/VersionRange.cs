@@ -45,7 +45,7 @@ namespace DynamicConfig
 
         public override string ToString()
         {
-            return _isEmpty ? string.Empty : string.Format("({0}-{1})", _from, _to);
+            return _isEmpty ? string.Empty : $"({_from}-{_to})";
         }
 
 #region Parse

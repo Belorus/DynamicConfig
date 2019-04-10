@@ -1,50 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using DynamicConfig;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using DynamicConfig;
+using NUnit.Framework;
 
 namespace UnitTestProject
 {
-    [TestClass]
-    public class ConfigKeyTests : TestsBase
+    [TestOf(typeof(ConfigKey.KeyEqualityComparer))]
+    public class KeyEqualityComparer : TestsBase
     {
-        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new List<string>{"a", "b", "c"});
+        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new []{"android", "ios", "w10"});
+        private ConfigKeyBuilder _keyBuilder;
 
-        [TestMethod]
-        public void KeyCompareTest()
+        [SetUp]
+        public void Initialize()
         {
-            VersionRange range;
-            VersionRange.TryParse("1.0.0.0", out range);
-            var key1 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a", "b" }), range);
-            var key2 = new ConfigKey("key", _prefixBuilder.Create(new List<string> { "a" }), range);
-            var key3 = new ConfigKey("ttt", _prefixBuilder.Create(new List<string> { "a", "b" }), range);
-
-            Assert.IsTrue (ConfigKey.KeyEqualityComparer.Comparer.Equals(key1, key2));
-            Assert.IsFalse(ConfigKey.KeyEqualityComparer.Comparer.Equals(key2, key3));
+            _keyBuilder = new ConfigKeyBuilder(_prefixBuilder);
         }
 
-        [TestMethod]
-        public void KeyWithVersionCompareTest()
+        [TestCase("-android-ios-key", "-android-ios-key", true)]
+        [TestCase("-android-ios-key", "-ios-android-key", true)]
+        [TestCase("-android-ios-key", "-android-key", true)]
+        [TestCase("-ios-key", "-android-ios-key", true)]
+        [TestCase("-(2.0.0)-ios-key", "-(1.0.0)-ios-key", true)]
+        [TestCase("-<0..10>-ios-key", "-<11..20>-ios-key", true)]
+        [TestCase("-ios-key1", "-android-ios-key2", false)]
+        [TestCase("key2", "key1", false)]
+        public void Equals_TwoKeys_AreEqual(string key1String, string key2String, bool equals)
         {
-            Func<string, VersionRange> parse = (str) =>
-            {
-                VersionRange result;
-                VersionRange.TryParse(str, out result);
-                return result;
-            };
+            _keyBuilder.TryCreate(key1String, out var key1);
+            _keyBuilder.TryCreate(key2String, out var key2);
 
-            var key1 = new ConfigKey("key", _prefixBuilder.Create(new List<string>(0)), parse("1.0-2.0"));
-            var key2 = new ConfigKey("key", _prefixBuilder.Create(new List<string>(0)), parse("1.0-2.0"));
-            var key3 = new ConfigKey("key", _prefixBuilder.Create(new List<string>(0)), parse("0.9-2.0"));
-            var key4 = new ConfigKey("key", _prefixBuilder.Create(new List<string>(0)), parse("1.1-2.0"));
-            var key5 = new ConfigKey("key", _prefixBuilder.Create(new List<string>(0)), parse("1.0-3.0"));
-
-            Assert.IsTrue(key1.CompareTo(key2) == 0);
-            Assert.IsTrue(key1.CompareTo(key3) >  0);
-            Assert.IsTrue(key1.CompareTo(key4) <  0);
-            Assert.IsTrue(key1.CompareTo(key5) >  0);
-            Assert.IsTrue(key3.CompareTo(key5) <  0);
+            Assert.AreEqual(equals, ConfigKey.KeyEqualityComparer.Comparer.Equals(key1, key2));
+            Assert.AreEqual(equals, ConfigKey.KeyEqualityComparer.Comparer.Equals(key2, key1));
         }
-
     }
 }

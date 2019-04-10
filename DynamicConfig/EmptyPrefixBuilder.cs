@@ -9,7 +9,7 @@ namespace DynamicConfig
             return true;
         }
 
-        public Prefix Create(List<string> prefixes)
+        public Prefix Create(IReadOnlyCollection<string> prefixes)
         {
             return Prefix.Empty;
         }

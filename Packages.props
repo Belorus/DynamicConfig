@@ -1,0 +1,7 @@
+<Project>
+ <PropertyGroup>
+   <NewtonsoftJsonVersion>12.0.1</NewtonsoftJsonVersion>
+   <SharpYamlVersion>1.6.5</SharpYamlVersion>
+   <CommandLineParserVersion>2.4.3</CommandLineParserVersion>
+ </PropertyGroup>
+</Project>

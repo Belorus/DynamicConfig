@@ -1,127 +1,63 @@
 ﻿using System;
 using DynamicConfig;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace UnitTestProject
 {
-    [TestClass]
+    [TestOf(typeof(VersionRange))]
     public class VersionRangeTests
     {
-        [TestMethod]
-        public void ParseVersionTest()
+        [TestCase("1.0.0-2.0.0", "1.5", true)]
+        [TestCase("1.0.0-", "1.5", true)]
+        [TestCase("-2.0.0", "1.5", true)]
+        [TestCase("2.0.0", "1.5", false)]
+        [TestCase("1.0-2.0", "1.0", true)]
+        [TestCase("1.0.0-2.0.0", "1.0.0", true)]
+        [TestCase("1.0.0.0-2.0.0.0", "1.0.0.0", true)]
+        [TestCase("1.0-2.0", "1.0.0", true)]
+        [TestCase("1.0.0-2.0.0", "1.0", false)]
+        [TestCase("1.0.0-2.0.0", "1.0.0.0", true)]
+        [TestCase("1.0.0.0-2.0.0.0", "1.0.0", false)]
+        [TestCase("2.0.0", "2.0.0", true)]
+        [TestCase("2.0.0", "2.0", false)]
+        public void InRange_DefaultComparer_Result(string range, string targetVersion, bool result)
         {
-            // Act
-            string version1 = "1.0.0-2.0.0";
-            string version2 = "1.0.0-";
-            string version3 = "-2.0.0";
-            string version4 = "2.0.0";
+            var version = Version.Parse(targetVersion);
+            VersionRange.TryParse(range, out var versionRange);
 
-            VersionRange versionRange1;
-            VersionRange versionRange2;
-            VersionRange versionRange3;
-            VersionRange versionRange4;
-
-            // Arrange
-            bool result1 = VersionRange.TryParse(version1, out versionRange1);
-            bool result2 = VersionRange.TryParse(version2, out versionRange2);
-            bool result3 = VersionRange.TryParse(version3, out versionRange3);
-            bool result4 = VersionRange.TryParse(version4, out versionRange4);
-
-            // Assert
-            Assert.IsTrue(result1);
-            Assert.IsTrue(result2);
-            Assert.IsTrue(result3);
-            Assert.IsTrue(result4);
-
-            Assert.IsNotNull(versionRange1);
-            Assert.IsNotNull(versionRange2);
-            Assert.IsNotNull(versionRange3);
-            Assert.IsNotNull(versionRange4);
+            Assert.IsNotNull(versionRange);
+            Assert.AreEqual(result, versionRange.InRange(version, VersionComparer.Default));
         }
 
-        [TestMethod]
-        public void InRangeTest()
+        [TestCase("1.0-2.0", "1.0", true)]
+        [TestCase("1.0.0-2.0.0", "1.0.0", true)]
+        [TestCase("1.0.0.0-2.0.0.0", "1.0.0.0", true)]
+        [TestCase("1.0-2.0", "1.0.0", true)]
+        [TestCase("1.0.0-2.0.0", "1.0", true)]
+        [TestCase("1.0.0-2.0.0", "1.0.0.0", true)]
+        [TestCase("1.0.0.0-2.0.0.0", "1.0.0", true)]
+        public void InRange_WeakComparer_Result(string range, string targetVersion, bool result)
         {
-            // Act
-            var version = Version.Parse("1.5");
-            string version1 = "1.0.0-2.0.0";
-            string version2 = "1.0.0-";
-            string version3 = "-2.0.0";
-            string version4 = "2.0.0";
+            var version = Version.Parse(targetVersion);
+            VersionRange.TryParse(range, out var versionRange);
 
-            VersionRange versionRange1;
-            VersionRange versionRange2;
-            VersionRange versionRange3;
-            VersionRange versionRange4;
-
-            // Arrange
-            VersionRange.TryParse(version1, out versionRange1);
-            VersionRange.TryParse(version2, out versionRange2);
-            VersionRange.TryParse(version3, out versionRange3);
-            VersionRange.TryParse(version4, out versionRange4);
-
-            // Assert
-            Assert.IsTrue(versionRange1.InRange(version, VersionComparer.Default));
-            Assert.IsTrue(versionRange2.InRange(version, VersionComparer.Default));
-            Assert.IsTrue(versionRange3.InRange(version, VersionComparer.Default));
-            Assert.IsFalse(versionRange4.InRange(version, VersionComparer.Default));
-            Assert.IsTrue(versionRange4.InRange(Version.Parse("2.0.0"), VersionComparer.Default));
+            Assert.AreEqual(result, versionRange.InRange(version, VersionComparer.Weak));
         }
 
-        [TestMethod]
-        public void InRangeTestDefaultComparer()
+        [TestCase("5.0-10.0", "1.0-10.0")]
+        [TestCase("5.0-10.0", "1.0-4.0")]
+        [TestCase("5.0-10.0", "4.0-9.0")]
+        [TestCase("5.0-10.0", "4.0-11.0")]
+        [TestCase("5.0-10.0", "-4.0")]
+        [TestCase("5.0-10.0", "-11.0")]
+        [TestCase("5.0-10.0", "-10.0")]
+        public void VersionRange_Compare_LeftMoreThanRight(string left, string right)
         {
-            // Act
-            string version1 = "1.0-2.0";
-            string version2 = "1.0.0-2.0.0";
-            string version3 = "1.0.0.0-2.0.0.0";
+            VersionRange.TryParse(left, out var leftVersion);
+            VersionRange.TryParse(right, out var rightVersion);
 
-            VersionRange versionRange1;
-            VersionRange versionRange2;
-            VersionRange versionRange3;
-
-            // Arrange
-            VersionRange.TryParse(version1, out versionRange1);
-            VersionRange.TryParse(version2, out versionRange2);
-            VersionRange.TryParse(version3, out versionRange3);
-
-            // Assert
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0"), VersionComparer.Default));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0"), VersionComparer.Default));
-            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0.0"), VersionComparer.Default));
-
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0.0"), VersionComparer.Default));
-            Assert.IsFalse(versionRange2.InRange(new Version("1.0"), VersionComparer.Default));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0.0"), VersionComparer.Default));
-            Assert.IsFalse(versionRange3.InRange(new Version("1.0.0"), VersionComparer.Default));
-        }
-
-        [TestMethod]
-        public void InRangeTestWeakComparer()
-        {
-            // Act
-            string version1 = "1.0-2.0";
-            string version2 = "1.0.0-2.0.0";
-            string version3 = "1.0.0.0-2.0.0.0";
-
-            VersionRange versionRange1;
-            VersionRange versionRange2;
-            VersionRange versionRange3;
-
-            // Arrange
-            VersionRange.TryParse(version1, out versionRange1);
-            VersionRange.TryParse(version2, out versionRange2);
-            VersionRange.TryParse(version3, out versionRange3);
-
-            // Assert
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0"), VersionComparer.Weak));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0"), VersionComparer.Weak));
-            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0.0"), VersionComparer.Weak));
-
-            Assert.IsTrue(versionRange1.InRange(new Version("1.0.0"), VersionComparer.Weak));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0"), VersionComparer.Weak));
-            Assert.IsTrue(versionRange2.InRange(new Version("1.0.0.0"), VersionComparer.Weak));
-            Assert.IsTrue(versionRange3.InRange(new Version("1.0.0"), VersionComparer.Weak));
+            Assert.IsTrue(leftVersion.CompareTo(rightVersion) > 0);
+            Assert.IsTrue(rightVersion.CompareTo(leftVersion) < 0);
         }
     }
 }

@@ -1,21 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
   </PropertyGroup>
-
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
-    <PackageReference Include="SharpYaml" Version="1.6.2" />
+    <PackageReference Include="SharpYaml" Version="$(SharpYamlVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicConfig\DynamicConfig.csproj" />
+    <ProjectReference Include="..\DynamicConfigTokenizer.YML\DynamicConfigTokenizer.YML.csproj" />
+  </ItemGroup>
 </Project>

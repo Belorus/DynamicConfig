@@ -30,6 +30,10 @@ namespace GeCon
                             toAsMap[kv.Key] = kv.Value;
                         }
                     }
+                    else
+                    {
+                        to[kv.Key] = kv.Value;
+                    }
                 }
                 else
                 {
@@ -48,7 +52,7 @@ namespace GeCon
                     SortKeyForMapping = false,
                     EmitTags = false,
                     PreferredIndent = 4,
-                    LimitPrimitiveFlowSequence = 25,
+                    LimitPrimitiveFlowSequence = 1,
                     EmitJsonComptible = isJsonCompatible,
                     EmitAlias = false
                 }).Serialize(writer, partMap);
@@ -63,7 +67,7 @@ namespace GeCon
             using (var stream = File.OpenRead(filePath))
             {
                 var formatter = new Serializer();
-                return formatter.Deserialize<Dictionary<object, object>>(stream);
+                return formatter.Deserialize<Dictionary<object, object>>(stream) ?? new Dictionary<object, object>();
             };
         }
     }

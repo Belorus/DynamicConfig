@@ -6,7 +6,7 @@ namespace DynamicConfig
     internal interface IPrefixBuilder
     {
         bool Contains(string prefix);
-        Prefix Create(List<string> prefixes);
+        Prefix Create(IReadOnlyCollection<string> prefixes);
     }
 
     internal class PrefixBuilder : IPrefixBuilder
@@ -14,7 +14,7 @@ namespace DynamicConfig
         private readonly Dictionary<string, int> _prefixes;
         private readonly int _count;
 
-        public PrefixBuilder(ICollection<string> prefixes)
+        public PrefixBuilder(IReadOnlyCollection<string> prefixes)
         {
             if (prefixes != null)
             {
@@ -50,14 +50,14 @@ namespace DynamicConfig
             return _prefixes.ContainsKey(prefix);
         }
 
-        public Prefix Create(List<string> prefixes)
+        public Prefix Create(IReadOnlyCollection<string> prefixes)
         {
             int hash = 0;
             foreach (var prefix in prefixes)
             {
                 int offset = IndexOf(prefix);
                 if (offset < 0)
-                    throw new NotSupportedException(string.Format("Prefix \"{0}\" doesn't supported", prefix));
+                    throw new NotSupportedException($"Prefix \"{prefix}\" doesn't supported");
 
                 hash |= 1 << _count - offset - 1;
             }

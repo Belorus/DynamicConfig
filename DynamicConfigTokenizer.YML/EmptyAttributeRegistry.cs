@@ -4,7 +4,7 @@ using System.Reflection;
 using SharpYaml.Serialization;
 using SharpYaml.Serialization.Descriptors;
 
-namespace DynamicConfig.SharpYaml
+namespace DynamicConfigTokenizer.YML
 {
     internal class EmptyAttributeRegistry : IAttributeRegistry
     {

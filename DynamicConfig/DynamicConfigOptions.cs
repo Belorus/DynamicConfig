@@ -5,10 +5,10 @@ namespace DynamicConfig
 {
     public class DynamicConfigOptions
     {
-        public ICollection<string> Prefixes;
+        public IReadOnlyCollection<string> Prefixes;
         public Version AppVersion;
         public IComparer<Version> VersionComparer;
+        public ISegmentChecker SegmentChecker;
         public bool IgnorePrefixes;
-        public bool IgnoreVersions;
     }
 }

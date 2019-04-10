@@ -7,7 +7,7 @@ namespace DynamicConfig
     {
         public static IComparer<Version> Default = new DefaultVersionComparer();
         public static IComparer<Version> Weak = new WeakVersionComparer();
-        internal static IComparer<Version> Null = new NullVersionComparer();
+        public static IComparer<Version> Null = new NullVersionComparer();
 
         private class DefaultVersionComparer : IComparer<Version>
         {

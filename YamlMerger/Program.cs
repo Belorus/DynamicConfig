@@ -12,9 +12,10 @@ namespace YamlMerger
     {
         private static void Main(string[] args)
         {
-            var options = new Options();
-            if (Parser.Default.ParseArguments(args, options))
+            var parseResult = Parser.Default.ParseArguments<Options>(args);
+            if (parseResult.Tag == ParserResultType.Parsed)
             {
+                var options = parseResult.MapResult(o => o, _ => null);
                 Console.WriteLine("Merging dynamic configs...");
 
                 Directory.CreateDirectory(options.InputPath);
@@ -42,7 +43,7 @@ namespace YamlMerger
             }
             else
             {
-                var helpText = HelpText.AutoBuild(options).ToString();
+                var helpText = HelpText.AutoBuild(parseResult).ToString();
 
                 Console.WriteLine(helpText);
             }

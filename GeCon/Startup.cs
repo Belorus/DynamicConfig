@@ -25,16 +25,29 @@ namespace GeCon
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .WithExposedHeaders("Authorization", "WWW-Authenticate");
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseDeveloperExceptionPage();
 
+            app.UseCors("AllowAll");
+            app.UseStaticFiles();
             app.UseMvc();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {

@@ -10,6 +10,7 @@ namespace DynamicConfig
 
         private readonly Version _appVersion;
         private readonly IComparer<Version> _versionComparer;
+        private readonly ISegmentChecker _segmentChecker;
 
         private class ConfigKeyItem
         {
@@ -21,11 +22,16 @@ namespace DynamicConfig
             public object Value;
         }
 
-        public ConfigReader(List<Dictionary<object, object>> configs, IPrefixBuilder prefixBuilder, Version appVersion, IComparer<Version> versionComparer)
+        public ConfigReader(List<Dictionary<object, object>> configs,
+            IPrefixBuilder prefixBuilder,
+            Version appVersion,
+            IComparer<Version> versionComparer,
+            ISegmentChecker segmentChecker)
         {
             _configs = configs;
             _appVersion = appVersion;
             _versionComparer = versionComparer;
+            _segmentChecker = segmentChecker;
             _keyBuilder = new ConfigKeyBuilder(prefixBuilder);
         }
 
@@ -33,7 +39,7 @@ namespace DynamicConfig
         {
             var parsedConfig = new Dictionary<ConfigKey, ConfigKeyItem>(ConfigKey.KeyEqualityComparer.Comparer);
 
-            int itemsCount = 0;
+            var itemsCount = 0;
             foreach (var config in _configs)
             {
                 itemsCount += ParseRecursive(config, parsedConfig, null);
@@ -42,8 +48,7 @@ namespace DynamicConfig
             var result = new Dictionary<string, object>(itemsCount);
             foreach (var kv in parsedConfig)
             {
-                var configKeyValue = kv.Value as ConfigKeyValue;
-                if (configKeyValue != null)
+                if (kv.Value is ConfigKeyValue configKeyValue)
                 {
                     result.Add(kv.Key.Key, configKeyValue.Value);
                 }
@@ -57,27 +62,29 @@ namespace DynamicConfig
             int itemsCount = 0;
             foreach (var pair in rawConfig)
             {
-                ConfigKey key;
-                if (_keyBuilder.TryCreate(pair.Key.ToString(), out key))
+                if (_keyBuilder.TryCreate(pair.Key.ToString(), out var key))
                 {
                     key = parentKey != null ? parentKey.Merge(key) : key;
-                    object value = pair.Value;
+                    var value = pair.Value;
 
                     if (!key.VersionRange.InRange(_appVersion, _versionComparer))
                     {
                         continue;
                     }
 
-                    ConfigKeyItem keyItem;
-                    bool keyExists = config.TryGetValue(key, out keyItem);
-                    ConfigKeyValue valueItem = keyItem as ConfigKeyValue;
+                    if (!_segmentChecker.Check(key.Segment))
+                    {
+                        continue;
+                    }
 
-                    var dict = value as Dictionary<object, object>;
-                    if (dict != null)
+                    var keyExists = config.TryGetValue(key, out var keyItem);
+                    var valueItem = keyItem as ConfigKeyValue;
+
+                    if (value is Dictionary<object, object> dict)
                     {
                         if (valueItem != null)
                         {
-                            throw new DynamicConfigException(string.Format("Key '{0}' have different value types", key.Key));
+                            throw new DynamicConfigException($"Key '{key.Key}' have different value types");
                         }
 
                         config[key] = new ConfigKeyItem
@@ -92,7 +99,7 @@ namespace DynamicConfig
                         {
                             if (valueItem == null)
                             {
-                                throw new DynamicConfigException(string.Format("Key '{0}' have different value types", key.Key));
+                                throw new DynamicConfigException($"Key '{key.Key}' have different value types");
                             }
 
                             if (key.CompareTo(keyItem.Key) > 0)

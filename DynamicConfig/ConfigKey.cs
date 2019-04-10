@@ -5,12 +5,18 @@ namespace DynamicConfig
         public readonly string Key;
         public readonly Prefix Prefix;
         public readonly VersionRange VersionRange;
+        public readonly Segment Segment;
 
-        public ConfigKey(string key, Prefix prefix, VersionRange versionRange)
+        public ConfigKey(
+            string key,
+            Prefix prefix, 
+            VersionRange versionRange,
+            Segment segment)
         {
             Key = key;
             Prefix = prefix;
             VersionRange = versionRange;
+            Segment = segment;
         }
 
         public ConfigKey Merge(ConfigKey other)
@@ -22,12 +28,12 @@ namespace DynamicConfig
         {
             var newKey = first.Key + ":" + second.Key;
             var newPrefix = Prefix.Merge(first.Prefix, second.Prefix);
-            return new ConfigKey(newKey, newPrefix, second.VersionRange);
+            return new ConfigKey(newKey, newPrefix, second.VersionRange, second.Segment);
         }
 
         public override string ToString()
         {
-            return  string.Format("[{0}{1} : {2}]", Key, VersionRange, Prefix);
+            return $"[{Key}{VersionRange}{Segment} : {Prefix}]";
         }
     }
 }

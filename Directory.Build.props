@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="Packages.props"/>
+  
+  <PropertyGroup>
+    <ClosestParentDirectoryBuildProps>$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))</ClosestParentDirectoryBuildProps>
+  </PropertyGroup>
+  <Import Project="$(ClosestParentDirectoryBuildProps)" Condition="$(ClosestParentDirectoryBuildProps) != ''" />
+</Project>

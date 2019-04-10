@@ -4,13 +4,13 @@ namespace YamlMerger
 {
     public class Options
     {
-        [Option("i", Required = true)]
+        [Option('i', "input", Required = true)]
         public string InputPath { get; set; }
 
-        [Option("o", Required = true)]
+        [Option('o', "output", Required = true)]
         public string OutputPath { get; set; }
 
-        [Option("p", DefaultValue = "*.part.yml")]
+        [Option('p', "pattern", Default = "*.part.yml")]
         public string Pattern { get; set; }
     }
 }

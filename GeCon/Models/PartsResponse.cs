@@ -19,5 +19,6 @@ namespace GeCon.Models
     {
         public string id;
         public string display_name;
+        public string error;
     }
 }

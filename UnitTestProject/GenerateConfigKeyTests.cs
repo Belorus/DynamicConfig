@@ -1,113 +1,96 @@
 ﻿using System.Collections.Generic;
 using DynamicConfig;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace UnitTestProject
 {
-    [TestClass]
-    public class GenerateConfigKeyTests : TestsBase
+    [TestOf(typeof(ConfigKeyBuilder))]
+    public class ConfigKeyBuilderTests : TestsBase
     {
-        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new List<string> {"a", "b", "c"});
+        private readonly PrefixBuilder _prefixBuilder = new PrefixBuilder(new[] {"android", "ios"});
         private ConfigKeyBuilder _keyBuilder;
 
-        [TestInitialize]
+        [SetUp]
         public void Initialize()
         {
             _keyBuilder = new ConfigKeyBuilder(_prefixBuilder);
         }
 
-        [TestMethod]
-        public void KeyGeneratorWithoutPrefixes()
+        [TestCase("key")]
+        [TestCase("key", new[] { "android" })]
+        [TestCase("key", new[] { "android", "ios" })]
+        [TestCase("key", new[] { "android", "ios" }, "1.0.0-2.0.0")]
+        [TestCase("key", new[] { "android", "ios" }, "1.0.0-")]
+        [TestCase("key", new[] { "android", "ios" }, "-1.0.0")]
+        [TestCase("key", new[] { "android", "ios" }, "1.0.0")]
+        [TestCase("key", new[] { "android", "ios" }, "1.0.0-2.0.0", "0..10")]
+        [TestCase("key", new[] { "android", "ios" }, "1.0.0-2.0.0", "*")]
+        [TestCase("key", new[] { "android", "ios" }, null, "*")]
+        [TestCase("key", new[] { "android", "ios" }, null, "0..10")]
+        [TestCase("key", null, "1.0.0-2.0.0", "*")]
+        [TestCase("key", null, "1.0.0-2.0.0")]
+        [TestCase("key", null, null, "*")]
+        public void TryCreate_KeyString_Success(string keyString, string[] prefixes = null, string versionRange = null, string segmentation = null)
         {
-            // Aggange
-            string keyString = GenerateKey("key");
+            var generatedKey = GenerateKey(keyString, ToPrefixes(prefixes, versionRange, segmentation));
 
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
+            var createResult = _keyBuilder.TryCreate(generatedKey, out var key);
 
-            // Assert
-            Assert.IsTrue(result);
+            Assert.IsTrue(createResult);
             Assert.IsNotNull(key);
-            Assert.AreEqual("key", key.Key);
+            Assert.AreEqual(keyString, key.Key);
+            Assert.AreEqual(_prefixBuilder.Create(prefixes ?? new string[0]), key.Prefix);
+
+            VersionRange.TryParse(versionRange ?? string.Empty, out var expectedVersionRange);
+            expectedVersionRange = expectedVersionRange ?? VersionRange.Empty;
+            Assert.IsTrue(expectedVersionRange.CompareTo(key.VersionRange) == 0);
+
+            Segment.TryParse(segmentation ?? string.Empty, out var expectedSegmentation);
+            expectedSegmentation = expectedSegmentation ?? Segment.Default;
+            Assert.IsTrue(expectedSegmentation.CompareTo(key.Segment) == 0);
         }
 
-        [TestMethod]
-        public void KeyGeneratorWithPrefixes()
+        [Test]
+        public void TryCreate_KeyWithUnregisteredPrefixes_CantCreate()
         {
-            // Arrange
-            string keyString = GenerateKey("key", "a", "b");
+            var keyString = GenerateKey("key", "android", "ios", "win32");
 
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
+            var result = _keyBuilder.TryCreate(keyString, out var key);
 
-            // Assert
-            Assert.IsTrue(result);
-            Assert.IsNotNull(key);
-            Assert.AreEqual("key", key.Key);
-            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b" }), key.Prefix);
-        }
-
-        [TestMethod]
-        public void KeyGeneratorWithInvalidPrefixes1()
-        {
-            // Arrange
-            string keyString = GenerateKey("key", "a", "b", "e");
-
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
-
-            // Assert
             Assert.IsFalse(result);
             Assert.IsNull(key);
         }
 
-        [TestMethod]
-        public void KeyGeneratorWithInvalidPrefixes2()
+        [TestCase("key", null, "1.0.0-2.0.0.fail", "*")]
+        [TestCase("key", null, "1.0.0-2.0.0", "fail")]
+        [TestCase("key", null, "-1.0.0-")]
+        [TestCase("key", null, null, "fail.fail")]
+        public void TryCreate_InvalidData_Exception(string keyString, string[] prefixes = null, string versionRange = null, string segmentation = null)
         {
-            // Arrange
-            string keyString = GenerateKey("key", "a", "e", "b");
+            var generatedKey = GenerateKey(keyString, ToPrefixes(prefixes, versionRange, segmentation));
 
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
-
-            // Assert
-            Assert.IsFalse(result);
-            Assert.IsNull(key);
+            Assert.Throws<DynamicConfigException>(() => _keyBuilder.TryCreate(generatedKey, out var _));
         }
 
-        [TestMethod]
-        public void KeyGeneratorWithVersionRangePrefixes()
+        private static string[] ToPrefixes(string[] prefixes, string versionRange, string segmentation)
         {
-            // Arrange
-            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.0)", "c");
+            var result = new List<string>();
+            if (versionRange != null)
+            {
+                result.Add($"({versionRange})");
+            }
 
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
+            if (segmentation != null)
+            {
+                result.Add($"<{segmentation}>");
+            }
 
-            // Assert
-            Assert.IsTrue(result);
-            Assert.IsNotNull(key);
-            Assert.AreEqual("key", key.Key);
-            Assert.AreEqual(_prefixBuilder.Create(new List<string> { "a", "b", "c" }), key.Prefix);
-        }
+            if (prefixes != null)
+            {
+                result.AddRange(prefixes);
+            }
 
-        [TestMethod]
-        [ExpectedException(typeof(DynamicConfigException))]
-        public void KeyGeneratorWithInvalidVersionRangePrefixes()
-        {
-            // Arrange
-            string keyString = GenerateKey("key", "a", "b", "(0.2.0-2.3.fail)", "c");
-
-            // Act
-            ConfigKey key;
-            var result = _keyBuilder.TryCreate(keyString, out key);
-
-            // Assert
+            return result.ToArray();
         }
     }
 }

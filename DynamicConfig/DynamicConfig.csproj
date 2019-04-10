@@ -1,26 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{968DE415-EF45-4C22-AA67-9F352ECA5BDA}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <OutputPath>..\..\Bin\$(Configuration)\$(Platform)\$(AssemblyName)\</OutputPath>
     <RootNamespace>DynamicConfig</RootNamespace>
     <AssemblyName>DynamicConfig</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Profile78</TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <IntermediateOutputPath>..\..\Build\Obj\$(Configuration)\$(Platform)\$(AssemblyName)\</IntermediateOutputPath>
-    <OutputPath>..\..\Bin\$(Configuration)\$(Platform)\$(AssemblyName)\</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-
-    <SolutionDir Condition=" '$(SolutionDir)' == ''">..\</SolutionDir>
+    <Company>Playtika Ltd.</Company>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,41 +26,4 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE;$(ExtraDefineConstants)</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="ConfigKey.comparers.cs">
-      <DependentUpon>ConfigKey.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ConfigKey.cs" />
-    <Compile Include="ConfigReader.cs" />
-    <Compile Include="DynamicConfig.cs" />
-    <Compile Include="DynamicConfigException.cs" />
-    <Compile Include="DynamicConfigFactory.cs" />
-    <Compile Include="DynamicConfigOptions.cs" />
-    <Compile Include="EmptyPrefixBuilder.cs" />
-    <Compile Include="IDynamicConfig.cs" />
-    <Compile Include="ConfigKeyBuilder.cs" />
-    <Compile Include="TypeExtensions.cs" />
-    <Compile Include="Prefix.cs" />
-    <Compile Include="PrefixConfig.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VersionComparer.cs" />
-    <Compile Include="VersionRange.cs" />
-    <Compile Include="SharpYaml\EmptyAttributeRegistry.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="SharpYaml, Version=1.6.1.0, Culture=neutral, PublicKeyToken=1ced8108e942bc02, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)packages\SharpYaml.1.6.1\lib\portable-net40+sl5+win8+wp8+wpa81\SharpYaml.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

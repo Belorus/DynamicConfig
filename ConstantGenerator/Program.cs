@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using CommandLine;
 using DynamicConfig;
+using DynamicConfigTokenizer.JSON;
+using DynamicConfigTokenizer.YML;
 
 namespace ConstantGenerator
 {
@@ -13,41 +13,54 @@ namespace ConstantGenerator
     {
         static void Main(string[] args)
         {
-            Options options = new Options();
-            if (Parser.Default.ParseArguments(args, options))
+            var parseResult = Parser.Default.ParseArguments<Options>(args);
+            
+            if (parseResult.Tag == ParserResultType.Parsed)
             {
+                Options options = parseResult.MapResult(o => o, _ => null);
                 var files = options.InputConfigPath.Split(',').Select(File.OpenRead).OfType<Stream>().ToArray();
-                var config = DynamicConfigFactory.CreateConfig(files);
-                
+                var config = DynamicConfigFactory.CreateConfig(ResolveFormatTokenizer(options.InputConfigPath), files);
+
                 var configOptions = new DynamicConfigOptions
                 {
                     IgnorePrefixes = true,
-                    IgnoreVersions = true
+                    VersionComparer = VersionComparer.Null,
+                    SegmentChecker = SegmentChecker.Null
                 };
                 config.Build(configOptions);
 
                 string code = GenerateCode(options.Namespace, options.ClassName, config.AllKeys);
                 File.WriteAllText(options.OutputClassPath, code);
 
-                string log = string.Format("Successfully generated class '{0}' with {1} keys", options.ClassName, config.AllKeys.Count());
+                string log = $"Successfully generated class '{options.ClassName}' with {config.AllKeys.Count()} keys";
                 Console.WriteLine(log);
             }
             else
             {
-                string helpText = CommandLine.Text.HelpText.AutoBuild(options).ToString();
+                string helpText = CommandLine.Text.HelpText.AutoBuild(parseResult).ToString();
                 Console.WriteLine(helpText);
             }
         }
 
-        private static string GenerateCode(string ns, string className, IEnumerable<string> allKeys)
+        private static IDynamicConfigTokenizer ResolveFormatTokenizer(string fileName)
         {
-            var f = new ConstantClassGenerator(ns, className, allKeys.Select(CleanKey).GroupBy(k => k).ToDictionary(g => GetConstantName(g.Key), k => k.Key));
-            return  f.TransformText();
+            var fileInfo = new FileInfo(fileName);
+            if(fileInfo.Extension == SupportedFormats.Json)
+            {
+                return new JsonDynamicConfigTokenizer();
+            }
+            if(fileInfo.Extension == SupportedFormats.Yml)
+            {
+                return new YmlDynamicConfigTokenizer();
+            }
+
+            throw new NotSupportedException($"{fileInfo.Extension} not supported ");
         }
 
-        private static string CleanKey(string arg)
+        private static string GenerateCode(string ns, string className, IEnumerable<string> allKeys)
         {
-            return Regex.Replace(arg, @":(.*)-", ":");
+            var f = new ConstantClassGenerator(ns, className, allKeys.ToDictionary(GetConstantName, k => k));
+            return  f.TransformText();
         }
 
         private static string GetConstantName(string s)                

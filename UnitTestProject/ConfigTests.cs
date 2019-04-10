@@ -1,222 +1,133 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using DynamicConfig;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace UnitTestProject
 {
-    [TestClass]
+    [TestOf(typeof(DynamicConfig.DynamicConfig))]
     public class ConfigTests : TestsBase
     {
-        private readonly string[] _prefixes = {"a", "b"};
+        private static readonly string[] Prefixes = {"IOS"};
+        private static readonly string[] EmptyPrefixes = new string[0];
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void EmptyConfigTest1()
+        [TestCase(arg: new string[0])]
+        [TestCase(arg: new []{""})]
+        [TestCase(arg: new []{TestData.Config})]
+        public void CreateConfig_GetValueByInvalidKey_Exception(string[] configs)
         {
-            var config = CreateConfig(new string[0], _prefixes);
-
-            // Act
-            config.Get<string>("invalidKey");
-
-            // Assert - Expects exception
+            var config = CreateConfig(configs, Prefixes);
+            Assert.Throws<ArgumentException>(() => config.Get<string>("invalidKey"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void EmptyConfigTest2()
+        public void GetValue_ValidKeyWithoutPrefixes_CorrectValue()
         {
-            var config = CreateConfig(new[] {TestData.EmptyData}, _prefixes);
+            var config = CreateConfig(TestData.Config, EmptyPrefixes);
 
-            // Act
-            config.Get<string>("invalidKey");
+            var timeout = config.Get<int>("http:timeout");
 
-            // Assert - Expects exception
+            Assert.That(timeout, Is.EqualTo(2000));
         }
 
-        [TestMethod]
-        public void GroupTest1()
+        [Test]
+        public void GetValue_ValidKeyWithPrefixes_CorrectValue()
         {
-            // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(TestData.Data2, _prefixes);
+            var config = CreateConfig(TestData.Config, Prefixes);
 
-            // Act
+            var timeout = config.Get<int>("http:timeout");
+
+            Assert.That(timeout, Is.EqualTo(1000));
+        }
+
+        [Test]
+        public void AllKeys_CheckCount_CorrectKeysCount()
+        {
+            var config = CreateConfig(TestData.Config, Prefixes);
+
             var groups = config.AllKeys;
 
-            // Assert
-            Assert.AreEqual(7, groups.Count());
+            Assert.AreEqual(5, groups.Count());
         }
 
-        [TestMethod]
-        public void TwoConfigMergeTest()
+        [Test]
+        public void TwoConfigMerge_CheckKeysCount_CorrectKeysCount()
         {
-            // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.Data2, TestData.Data3 }, _prefixes);
+            var config = CreateConfig(new[] { TestData.Config, TestData.AddNewFields }, Prefixes);
 
-            // Act
-            var groups = config.AllKeys;;
+            var groups = config.AllKeys;
 
-            // Assert
-            Assert.AreEqual(8, groups.Count());
+            Assert.That(groups.Count(), Is.EqualTo(6));
         }
 
-        [TestMethod]
-        public void TwoConfigMergeWithCombiningTest()
+        [Test]
+        public void TwoConfigMerge_GetValueFromBothConfigs_Correctvalues()
         {
-            // Arrange
-            var config = (DynamicConfig.DynamicConfig)CreateConfig(new[] { TestData.SimpleData, TestData.SimpleDataExtension }, _prefixes);
+            var config = CreateConfig(new[] { TestData.Config, TestData.AddNewFields }, EmptyPrefixes);
 
-            // Act
-            config.Build(new DynamicConfigOptions { Prefixes = new[] { TestData.SimpleData, TestData.SimpleDataExtension } });
+            var valueFromFirstConfig = config.Get<int>("http:timeout");
+            var valueFromSecondConfig = config.Get<int>("http:throttle_interval");
 
-            // Assert
-            Assert.AreEqual("test", config.Get<string>("a:b"));
-            Assert.AreEqual("test2", config.Get<string>("a:c"));
+            Assert.That(valueFromFirstConfig, Is.EqualTo(2000));
+            Assert.That(valueFromSecondConfig, Is.EqualTo(1000));
         }
 
-        [TestMethod]
-        public void GetDataFromConfigTest()
+        [Test]
+        public void MultipleBuild_GetValue_DifferentValues()
         {
-            // Arrange 
-            var config = CreateConfig(new[] { TestData.Data2, TestData.Data3 }, _prefixes);
+            var config = CreateConfig(new[] { TestData.Config }, EmptyPrefixes);
 
-            // Act
-            var result1 = config.Get<string>("a:a:c:e");
-            var result2 = config.Get<string>("c:k1");
-            var result3 = config.Get<string>("d:k1");
+            var beforeSecondBuild = config.Get<int>("http:timeout");
 
-            // Assert
-            Assert.AreEqual("-a-a-a-c-e", result1);
-            Assert.AreEqual("-a-c-k1", result2);
-            Assert.AreEqual("d-k1", result3);
+            config.Build(new DynamicConfigOptions{Prefixes = Prefixes});
+
+            var afterSecondBuild = config.Get<int>("http:timeout");
+
+            Assert.That(beforeSecondBuild, Is.EqualTo(2000));
+            Assert.That(afterSecondBuild, Is.EqualTo(1000));
         }
 
-        [TestMethod]
-        public void ConfigWithoutRootTestTest()
+        [Test]
+        public void BuildCOnfig_DifferentValueType_Exception()
         {
-            // Arrange 
-            var config = CreateConfig(new[] { TestData.DataWithoutRoot }, _prefixes);
-
-            // Act
-            var result = config.Get<string>("key1");
-
-            // Assert
-            Assert.AreEqual("key1", result);
+            Assert.Throws<DynamicConfigException>(() => CreateConfig(new[] { TestData.Config, TestData.OverrideCompressionWithInvalidStructure }, Prefixes));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void GetInvelidDataFromConfigTest()
+        [Test]
+        public void Get_Enum_CorrectValue()
         {
-            // Arrange
-            var config = CreateConfig(new[] { TestData.Data2, TestData.Data3 }, _prefixes);
+            var config = CreateConfig(TestData.Config, EmptyPrefixes);
 
-            // Act
-            config.Get<string>("invalidKey");
+            var enumFromString = config.Get<TestData.CompressionMode>("http:compression:mode");
+            var enumFromInt = config.Get<TestData.CompressionMode>("http:compression:int_mode");
 
-            // Assert - Expects exception
+            Assert.That(enumFromString, Is.EqualTo(TestData.CompressionMode.GZip));
+            Assert.That(enumFromInt, Is.EqualTo(TestData.CompressionMode.Deflate));
         }
 
-        [TestMethod]
-        public void MultipleBuildTest()
+        [TestCase("1.0.0.0", 3000)]
+        [TestCase("3.5.0.0", 4000)]
+        [TestCase("5.0.0.0", 2000)]
+        public void GetValue_SetAppVersion_CorrectValue(string version, int result)
         {
-            // Arrange 
-            var config = CreateConfig(new[] { TestData.Data4 }, _prefixes);
+            var config = CreateConfig(new[] { TestData.Config }, EmptyPrefixes);
+            config.Build(new DynamicConfigOptions { Prefixes = EmptyPrefixes, AppVersion = Version.Parse(version) });
 
-            // Act
-            var beforeSocondBuild1 = config.Get<string>("c:k");
-            var beforeSocondBuild2 = config.Get<string>("r:k");
+            var value = config.Get<int>("http:timeout");
 
-            var prefixes = new List<string>(_prefixes);
-            prefixes.Insert(1, "np");
-            config.Build(new DynamicConfigOptions{Prefixes = prefixes});
-
-            var afterSecondBuild1 = config.Get<string>("r:k");
-
-            // Assert
-            Assert.AreEqual("-a-c-k", beforeSocondBuild1);
-            Assert.AreEqual("r-k", beforeSocondBuild2);
-            Assert.AreEqual("-a-np-r-k", afterSecondBuild1);
+            Assert.That(value, Is.EqualTo(result));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(DynamicConfigException))]
-        public void DifferentValueTypeTest()
+        [TestCase(5, 10)]
+        [TestCase(30, 40)]
+        [TestCase(90, 50)]
+        public void GetValue_SetSegment_CorrectValue(int seed, int result)
         {
-            // Arrange
+            var config = CreateConfig(new[] { TestData.Config }, EmptyPrefixes);
+            config.Build(new DynamicConfigOptions { Prefixes = EmptyPrefixes, SegmentChecker = new SegmentChecker(seed)});
 
-            // Act
+            var value = config.Get<int>("http:retry_count");
 
-            // Assert
-            CreateConfig(new[] {TestData.Data5}, _prefixes);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(DynamicConfigException))]
-        public void DifferentValueTypeTest2()
-        {
-            // Arrange
-
-            // Act
-
-            // Assert
-            CreateConfig(new[] { TestData.Data6 }, _prefixes);
-        }
-
-        [TestMethod]
-        public void TestVersionRange()
-        {
-            // Arrange
-            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
-            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
-
-            // Act
-            var key1 = config.Get<string>("key1");
-
-            // Assert
-            Assert.AreEqual("value2", key1);
-        }
-
-        [TestMethod]
-        public void TestVersionRangeIntersectVersions1()
-        {
-            // Arrange
-            var config = CreateConfig(new[] { TestData.DataWithVersions2 }, _prefixes);
-            config.Build(new DynamicConfigOptions{Prefixes = _prefixes, AppVersion = new  Version(1, 0, 0, 0)});
-
-            // Act
-            var key1 = config.Get<string>("key1");
-
-            // Assert
-            Assert.AreEqual("value1", key1);
-        }
-
-        [TestMethod]
-        public void TestVersionRangeIntersectVersions2()
-        {
-            // Arrange
-            var config = CreateConfig(new[] { TestData.DataWithVersions3 }, _prefixes);
-            config.Build(new DynamicConfigOptions { Prefixes = _prefixes, AppVersion = new Version(1, 0, 0, 0) });
-
-            // Act
-            var key1 = config.Get<string>("key1");
-
-            // Assert
-            Assert.AreEqual("value1", key1);
-        }
-
-        [TestMethod]
-        public void TestVersionRangeWithoutApplicationVersion()
-        {
-            // Arrange
-            var config = CreateConfig(new[] { TestData.DataWithVersions1 }, _prefixes);
-
-            // Act
-            var key1 = config.Get<string>("key1");
-
-            // Assert
-            Assert.AreEqual("value3", key1);
+            Assert.That(value, Is.EqualTo(result));
         }
     }
 }

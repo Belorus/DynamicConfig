@@ -2,89 +2,37 @@
 {
     public class TestData
     {
-        public const string EmptyData = "";
+        public enum CompressionMode
+        {
+            GZip,
+            Deflate
+        }
 
-        public const string SimpleData = @"
-a:
-    b: test
+        public const string Config = @"
+http:
+    -IOS-timeout: 1000
+    timeout: 2000
+
+    -(1.0.0-2.0.0)-timeout: 3000
+    -(3.0.0-4.0.0)-timeout: 4000
+    -<0..10>-retry_count: 10
+    -<11..40>-retry_count: 40
+    retry_count: 50
+
+    compression:
+        enabled: true
+        mode: gzip
+        int_mode: 1
 ";
 
-        public const string SimpleDataExtension = @"
-a:
-    c: test2
+        public const string AddNewFields = @"
+http:
+    throttle_interval: 1000
 ";
 
-        public const string Data2 = @"
-a:
-    b: a-b
-    a:
-        c:
-            e: -a-a-a-c-e
-        d:
-            f: -a-a-a-d-f
-c:
-    k1: c-k1
-d:
-    k1: d-k1
--a-d:
-    k3: -a-d-k3
--b-d:
-    k4: -b-d-k4
-";
-
-        public const string Data3 = @"
--a-c:
-    k1: -a-c-k1
-r:
-    k5: r-k5
-";
-
-        public const string Data4 = @"
--a-c:
-    k: -a-c-k
-r:
-    k: r-k
--np-r:
-    k: -np-r-k
--a-np-r:
-    k: -a-np-r-k
-";
-
-        public const string Data5 = @"
--a-key:
-    key1: value1
-    key2: value2
-key: value
-";
-
-        public const string Data6 = @"
-key: value
--a-key:
-    key1: value1
-    key2: value2
-";
-
-        public const string DataWithoutRoot = @"
-key1: key1
-key2: key2
-key3: key3
-";
-
-        public const string DataWithVersions1 = @"
--(0.5.0-0.6.0)-key1: value1
-key1               : value3
--(0.5.0-2.0.0)-key1: value2
-";
-        public const string DataWithVersions2 = @"
--(0.6.0-1.6.0)-key1: value1
-key1               : value3
--(0.5.0-2.0.0)-key1: value2
-";
-
-        public const string DataWithVersions3 = @"
--(0.5.0-1.6.0)-key1: value1
-key1               : value3
--(0.5.0-2.0.0)-key1: value2
+        public const string OverrideCompressionWithInvalidStructure = @"
+http:
+    compression: false
 ";
     }
 }

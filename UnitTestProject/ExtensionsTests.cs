@@ -1,19 +1,19 @@
 ﻿using DynamicConfig;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace UnitTestProject
 {
-    [TestClass]
+    [TestOf(typeof(TypeExtensions))]
     public class ExtensionsTests
     {
-        [TestMethod]
-        public void BitsCountTest()
+        [TestCase(0, 0)]
+        [TestCase(1, 1)]
+        [TestCase(2, 10)]
+        [TestCase(3, 11)]
+        [TestCase(6, 1363)]
+        public void BitsCountTest(int expectedBitsCount, int number)
         {
-            Assert.AreEqual(0, 0.BitsCount());
-            Assert.AreEqual(1, 1.BitsCount());
-            Assert.AreEqual(2, 10.BitsCount());
-            Assert.AreEqual(3, 11.BitsCount());
-            Assert.AreEqual(6, 1363.BitsCount());
+            Assert.AreEqual(expectedBitsCount, number.BitsCount());
         }
     }
 }

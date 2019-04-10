@@ -7,6 +7,8 @@ namespace DynamicConfig
         internal const char PrefixSeparator = '-';
         internal const char OpenVersionRange = '(';
         internal const char CloseVersionRange = ')';
+        internal const char OpenSegmentation = '<';
+        internal const char CloseSegmentation = '>';
 
         private readonly IPrefixBuilder _prefixBuilder;
 
@@ -17,7 +19,10 @@ namespace DynamicConfig
             Prefix,
             BeginVersion,
             Version,
-            EndVersion
+            EndVersion,
+            BeginSegmentation,
+            Segmentation,
+            EndSegmentation,
         }
 
         public ConfigKeyBuilder(IPrefixBuilder prefixBuilder)
@@ -28,15 +33,16 @@ namespace DynamicConfig
         public bool TryCreate(string key, out ConfigKey configKey)
         {
             var prefixes = new List<string>();
-            VersionRange versionRange = VersionRange.Empty;
+            var versionRange = VersionRange.Empty;
+            var segmentation = Segment.Default;
 
-            ParserState state = ParserState.None;
+            var state = ParserState.None;
 
-            int tokenBeginIndex = 0;
-            int tokenLength = 0;
+            var tokenBeginIndex = 0;
+            var tokenLength = 0;
 
 
-            for (int i = 0; i < key.Length; i++)
+            for (var i = 0; i < key.Length; i++)
             {
                 char current = key[i];
 
@@ -49,15 +55,23 @@ namespace DynamicConfig
                         }
                         break;
                     case ParserState.PrefixSeparator:
-                        if (current != OpenVersionRange && current != PrefixSeparator)
+                        switch (current)
                         {
-                            tokenBeginIndex = i;
-                            tokenLength++;
-                            state = ParserState.Prefix;
-                        }
-                        else if (current == OpenVersionRange)
-                        {
-                            state = ParserState.BeginVersion;
+                            case OpenVersionRange:
+                                state = ParserState.BeginVersion;
+                                break;
+                            case OpenSegmentation:
+                                state = ParserState.BeginSegmentation;
+                                break;
+                            default:
+                                if (current != PrefixSeparator)
+                                {
+                                    tokenBeginIndex = i;
+                                    tokenLength++;
+                                    state = ParserState.Prefix;
+                                }
+
+                                break;
                         }
                         break;
                     case ParserState.Prefix:
@@ -67,7 +81,7 @@ namespace DynamicConfig
                         }
                         else
                         {
-                            string prefix = key.Substring(tokenBeginIndex, tokenLength);
+                            var prefix = key.Substring(tokenBeginIndex, tokenLength);
                             if (_prefixBuilder.Contains(prefix))
                             {
                                 prefixes.Add(prefix);
@@ -102,7 +116,34 @@ namespace DynamicConfig
                             if (!VersionRange.TryParse(key.Substring(tokenBeginIndex, tokenLength), out versionRange))
                             {
                                 configKey = null;
-                                throw new DynamicConfigException(string.Format("Invalid key format: {0}", key));
+                                throw new DynamicConfigException($"Invalid version range format: {key}");
+                            }
+                            tokenLength = 0;
+                            state = ParserState.PrefixSeparator;
+                        }
+                        break;
+                    case ParserState.BeginSegmentation:
+                        tokenBeginIndex = i;
+                        tokenLength++;
+                        state = ParserState.Segmentation;
+                        break;
+                    case ParserState.Segmentation:
+                        if (current != CloseSegmentation)
+                        {
+                            tokenLength++;
+                        }
+                        else
+                        {
+                            state = ParserState.EndSegmentation;
+                        }
+                        break;
+                    case ParserState.EndSegmentation:
+                        if (current == PrefixSeparator)
+                        {
+                            if (!Segment.TryParse(key.Substring(tokenBeginIndex, tokenLength), out segmentation))
+                            {
+                                configKey = null;
+                                throw new DynamicConfigException($"Invalid segment format: {key}");
                             }
                             tokenLength = 0;
                             state = ParserState.PrefixSeparator;
@@ -117,13 +158,13 @@ namespace DynamicConfig
 
                 if (!string.IsNullOrEmpty(key))
                 {
-                    configKey = new ConfigKey(key, _prefixBuilder.Create(prefixes), versionRange);
+                    configKey = new ConfigKey(key, _prefixBuilder.Create(prefixes), versionRange, segmentation);
                     return true;
                 }
             }
 
             configKey = null;
-            throw new DynamicConfigException(string.Format("Invalid key format: {0}", key));
+            throw new DynamicConfigException($"Invalid key format: {key}");
         }
     }
 }

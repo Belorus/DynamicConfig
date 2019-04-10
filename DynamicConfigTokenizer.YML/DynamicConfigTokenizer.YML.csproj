@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <OutputPath>..\..\Bin\$(Configuration)\$(Platform)\$(AssemblyName)\</OutputPath>
+    <RootNamespace>DynamicConfigTokenizer.YML</RootNamespace>
+    <AssemblyName>DynamicConfigTokenizer.YML</AssemblyName>
+    <Company>Playtika Ltd.</Company>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE;DEV_BUILD;$(ExtraDefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'QA' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;DEV_BUILD;$(ExtraDefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;$(ExtraDefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpYaml" Version="$(SharpYamlVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DynamicConfig\DynamicConfig.csproj" />
+  </ItemGroup>
+</Project>
